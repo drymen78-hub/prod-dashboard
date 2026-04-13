@@ -1,73 +1,46 @@
 import React from 'react';
 import { useDashboard } from './hooks/useDashboard';
-import { Header } from './components/Header';
-import { SummaryBar } from './components/SummaryBar';
-import { CleaningPanel } from './components/CleaningPanel';
-import { LaundryPanel } from './components/LaundryPanel';
+import { ShiftHeader } from './components/ShiftHeader';
+import { StaffPanel } from './components/StaffPanel';
+import { WorkOrderTable } from './components/WorkOrderTable';
+import { StatsPanel } from './components/StatsPanel';
+import { HandoverNotes } from './components/HandoverNotes';
+import { StageField } from './constants';
+import { ProcessStage } from './types';
 
 export const App: React.FC = () => {
   const {
-    reportDate, setReportDate, dateLabel,
-    cleaningTasks, updateCleaningTask,
-    cleaningSharedHours, setCleaningSharedHours,
-    cleaningTarget,      setCleaningTarget,
-    laundryStaff, updateLaundryStaff,
-    laundryTasks, updateLaundryTask,
-    laundrySupportSent,     setLaundrySupportSent,
-    laundrySupportReceived, setLaundrySupportReceived,
-    laundryTarget, setLaundryTarget,
-    cleaningTotals, laundryTotals,
-    snapshots,
-    saved, saveMsg, handleSave, handleReset,
-    hasData,
+    state, set, updateStaff, updateWorkOrder, handleReset,
+    totalStaff, totalCount, expectedTotal, processingRate,
   } = useDashboard();
 
   return (
-    <div style={{ maxWidth: 1500, margin: '0 auto' }}>
-      <Header
-        month={dateLabel.month}
-        day={dateLabel.day}
-        reportDate={reportDate}
-        onDateChange={setReportDate}
-        hasData={hasData}
-        saved={saved}
-        saveMsg={saveMsg}
-        onSave={handleSave}
+    <div style={{ maxWidth: 1020, margin: '0 auto', fontFamily: "'Malgun Gothic', 'Segoe UI', Arial, sans-serif" }}>
+      <ShiftHeader
+        date={state.date}
+        savedAt={state.savedAt}
+        totalStaff={totalStaff}
+        onDateChange={d => set('date', d)}
         onReset={handleReset}
       />
-
-      <SummaryBar
-        cleaningTotals={cleaningTotals}
-        laundryTotals={laundryTotals}
-        hasData={hasData}
+      <StaffPanel staff={state.staff} totalStaff={totalStaff} onUpdate={updateStaff} />
+      <WorkOrderTable
+        workOrders={state.workOrders}
+        totalCount={totalCount}
+        onCountChange={(id, count) => updateWorkOrder(id, 'count', count)}
+        onStageChange={(id: string, field: StageField, stage: ProcessStage) => updateWorkOrder(id, field, stage)}
       />
-
-      <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
-        <CleaningPanel
-          tasks={cleaningTasks}
-          onUpdate={updateCleaningTask}
-          sharedHours={cleaningSharedHours}
-          onSharedHoursChange={setCleaningSharedHours}
-          targetOut={cleaningTarget}
-          onTargetOutChange={setCleaningTarget}
-          totals={cleaningTotals}
-          snapshots={snapshots}
-        />
-        <LaundryPanel
-          staff={laundryStaff}
-          onStaffChange={updateLaundryStaff}
-          tasks={laundryTasks}
-          onUpdate={updateLaundryTask}
-          supportSent={laundrySupportSent}
-          onSupportSentChange={setLaundrySupportSent}
-          supportReceived={laundrySupportReceived}
-          onSupportReceivedChange={setLaundrySupportReceived}
-          targetCustomers={laundryTarget}
-          onTargetCustomersChange={setLaundryTarget}
-          totals={laundryTotals}
-          snapshots={snapshots}
-        />
-      </div>
+      <StatsPanel
+        avgItemsPerUnit={state.avgItemsPerUnit}
+        washMethodCount={state.washMethodCount}
+        totalCount={totalCount}
+        expectedTotal={expectedTotal}
+        processingRate={processingRate}
+        onAvgChange={v => set('avgItemsPerUnit', v)}
+        onWashCountChange={v => set('washMethodCount', v)}
+      />
+      <HandoverNotes notes={state.notes} onChange={v => set('notes', v)} />
+      <div style={{ height: 32 }} />
     </div>
   );
 };

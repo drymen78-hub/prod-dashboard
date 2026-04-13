@@ -1,38 +1,84 @@
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  background: #0e1e35;
-  background-image:
-    radial-gradient(ellipse at 20% 0%, #1a3a6a 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 100%, #0a2040 0%, transparent 50%);
-  color: #e8f0fe;
-  font-family: 'Segoe UI', 'Malgun Gothic', Arial, sans-serif;
-  padding: 16px;
+  background: #e8edf2;
+  background-image: linear-gradient(135deg, #e8edf2 0%, #dde4ec 100%);
+  color: #1e293b;
+  font-family: 'Malgun Gothic', 'Segoe UI', -apple-system, Arial, sans-serif;
   min-height: 100vh;
+  padding: 24px 16px;
   -webkit-font-smoothing: antialiased;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 13px;
 }
 
 input[type='number']::-webkit-inner-spin-button,
-input[type='number']::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+input[type='number']::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input[type='number'] { -moz-appearance: textfield; }
+
+input:focus, textarea:focus, select:focus {
+  outline: 2px solid #2563eb;
+  outline-offset: 1px;
 }
 
-input[type='number'] {
-  -moz-appearance: textfield;
+button { font-family: inherit; cursor: pointer; }
+button:active { transform: scale(0.97); }
+
+.card {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
 }
 
-button {
-  font-family: inherit;
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 18px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+  border-radius: 12px 12px 0 0;
+}
+.section-header h2 {
+  font-size: 13px;
+  font-weight: 700;
+  color: #374151;
+  letter-spacing: 0.3px;
 }
 
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed !important;
+.stage-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 32px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  user-select: none;
+  transition: filter 0.1s, transform 0.1s;
+  border: 1px solid transparent;
+  letter-spacing: 0.3px;
+}
+.stage-cell:hover { filter: brightness(0.94); }
+.stage-cell:active { transform: scale(0.95); }
+
+.count-input {
+  width: 100%;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 4px 6px;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  color: #1e293b;
+  background: #fff;
+  height: 32px;
+}
+.count-input:focus { border-color: #2563eb; }
+
+@media print {
+  body { background: #fff; padding: 0; }
+  .no-print { display: none !important; }
 }
