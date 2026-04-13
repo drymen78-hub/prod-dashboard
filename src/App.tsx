@@ -21,12 +21,21 @@ export const App: React.FC = () => {
   const handleCapture = useCallback(async () => {
     const el = contentRef.current;
     if (!el) return;
+
+    // 캡처 전 배경 잠깐 흰색으로 변경
+    const prev = el.style.background;
+    el.style.background = '#ffffff';
+
     const canvas = await html2canvas(el, {
-      scale: 2,
+      scale: 3,
       backgroundColor: '#ffffff',
       useCORS: true,
       logging: false,
+      removeContainer: true,
     });
+
+    el.style.background = prev;
+
     const link = document.createElement('a');
     link.download = `세탁인계_${state.date}.png`;
     link.href = canvas.toDataURL('image/png');
@@ -34,7 +43,7 @@ export const App: React.FC = () => {
   }, [state.date]);
 
   return (
-    <div style={{ maxWidth: 1020, margin: '0 auto', fontFamily: "'Malgun Gothic', 'Segoe UI', Arial, sans-serif" }}>
+    <div style={{ maxWidth: 1360, margin: '0 auto', fontFamily: "'Malgun Gothic', 'Segoe UI', Arial, sans-serif" }}>
       <ShiftHeader
         date={state.date}
         savedAt={state.savedAt}
@@ -44,13 +53,18 @@ export const App: React.FC = () => {
         onCapture={handleCapture}
         onSave={saveRecord}
       />
-      <div ref={contentRef} style={{ background: '#e8edf2', padding: '4px 0 8px' }}>
+      <div
+        ref={contentRef}
+        style={{ background: '#dde3ec', padding: '4px 0 6px', borderRadius: 8 }}
+      >
         <StaffPanel staff={state.staff} totalStaff={totalStaff} onUpdate={updateStaff} />
         <WorkOrderTable
           workOrders={state.workOrders}
           totalCount={totalCount}
           onCountChange={(id, count) => updateWorkOrder(id, 'count', count)}
-          onStageChange={(id: string, field: StageField, stage: ProcessStage) => updateWorkOrder(id, field, stage)}
+          onStageChange={(id: string, field: StageField, stage: ProcessStage) =>
+            updateWorkOrder(id, field, stage)
+          }
           onColorChange={(id: string, color: OrderColor) => updateWorkOrderColor(id, color)}
         />
         <StatsPanel
@@ -64,7 +78,7 @@ export const App: React.FC = () => {
         />
         <HandoverNotes notes={state.notes} onChange={v => set('notes', v)} />
       </div>
-      <div style={{ height: 32 }} />
+      <div style={{ height: 20 }} />
     </div>
   );
 };
