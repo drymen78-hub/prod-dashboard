@@ -20,10 +20,15 @@ const Btn: React.FC<{
   title?: string;
 }> = ({ onClick, style, children, title }) => (
   <button onClick={onClick} title={title} style={{
-    background: '#1e293b', border: '1px solid #334155',
-    borderRadius: 6, color: '#94a3b8',
-    padding: '5px 12px', fontSize: 12, fontWeight: 700,
-    cursor: 'pointer', whiteSpace: 'nowrap',
+    background: '#1a2f50',
+    border: '1px solid #3a5a90',
+    borderRadius: 8,
+    color: '#b8cfe8',
+    padding: '7px 16px',
+    fontSize: 14,
+    fontWeight: 700,
+    cursor: 'pointer',
+    whiteSpace: 'nowrap',
     transition: 'all 0.15s',
     ...style,
   }}>{children}</button>
@@ -33,73 +38,82 @@ export const Header: React.FC<Props> = ({
   month, day, reportDate, onDateChange,
   hasData, saved, saveMsg, onSave, onReset,
 }) => (
-  <div style={{ marginBottom: 10 }}>
+  <div style={{ marginBottom: 12 }}>
     {/* 시스템 타이틀 바 */}
     <div style={{
-      background: '#0f172a', border: '1px solid #334155',
-      borderRadius: '10px 10px 0 0', padding: '6px 16px',
-      display: 'flex', alignItems: 'center', gap: 8,
+      background: '#0f1e32',
+      border: '1px solid #2e4a7a',
+      borderRadius: '12px 12px 0 0',
+      padding: '7px 18px',
+      display: 'flex', alignItems: 'center', gap: 10,
     }}>
       <div style={{
-        width: 8, height: 8, borderRadius: '50%',
-        background: hasData ? '#4ade80' : '#475569',
-        boxShadow: hasData ? '0 0 6px #4ade80' : 'none',
+        width: 9, height: 9, borderRadius: '50%',
+        background: hasData ? '#4ade80' : '#3b5998',
+        boxShadow: hasData ? '0 0 8px #4ade80' : 'none',
       }} />
-      <span style={{ fontSize: 10, fontWeight: 700, color: '#475569', letterSpacing: '0.08em' }}>
+      <span style={{ fontSize: 12, fontWeight: 700, color: '#7a9cc0', letterSpacing: '0.06em' }}>
         야간책임운영실 · 야간세탁운영팀 · 업무마감 대시보드
       </span>
       {hasData && !saved && (
-        <span style={{ marginLeft: 'auto', fontSize: 10, color: '#f97316', fontWeight: 700 }}>● 미저장</span>
+        <span style={{ marginLeft: 'auto', fontSize: 12, color: '#fb923c', fontWeight: 800 }}>● 미저장</span>
       )}
       {saved && (
-        <span style={{ marginLeft: 'auto', fontSize: 10, color: '#4ade80', fontWeight: 700 }}>● 저장됨</span>
+        <span style={{ marginLeft: 'auto', fontSize: 12, color: '#4ade80', fontWeight: 800 }}>● 저장됨</span>
       )}
     </div>
 
     {/* 메인 헤더 */}
     <div style={{
-      background: '#1e293b', border: '1px solid #334155',
-      borderTop: 'none', borderRadius: '0 0 10px 10px',
-      padding: '10px 16px',
+      background: '#1a2f50',
+      border: '1px solid #2e4a7a',
+      borderTop: 'none',
+      borderRadius: '0 0 12px 12px',
+      padding: '14px 18px',
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      flexWrap: 'wrap', gap: 8,
+      flexWrap: 'wrap', gap: 10,
     }}>
       <div>
-        <h1 style={{ fontSize: 22, fontWeight: 800, margin: 0, lineHeight: 1.2 }}>
+        <h1 style={{ fontSize: 26, fontWeight: 900, margin: 0, lineHeight: 1.2, color: '#f0f6ff' }}>
           <span style={{ color: COLORS.cleaning }}>{month}월 {day}일</span>
-          <span style={{ color: '#94a3b8', fontSize: 15, fontWeight: 600, marginLeft: 8 }}>
+          <span style={{ color: '#b8cfe8', fontSize: 18, fontWeight: 700, marginLeft: 10 }}>
             업무마감 현황
           </span>
         </h1>
-        <div style={{ fontSize: 11, color: '#475569', marginTop: 3, fontWeight: 600 }}>
+        <div style={{ fontSize: 13, color: '#7a9cc0', marginTop: 4, fontWeight: 600 }}>
           개별클리닝파트 · 런드리파트
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
         <input
           type="date"
           value={reportDate}
           onChange={e => onDateChange(e.target.value)}
           style={{
-            background: '#0f172a', border: '1px solid #334155',
-            borderRadius: 6, color: '#94a3b8',
-            padding: '5px 10px', fontSize: 12, fontWeight: 600, outline: 'none',
+            background: '#0f1e32',
+            border: '1px solid #3a5a90',
+            borderRadius: 8,
+            color: '#b8cfe8',
+            padding: '7px 12px',
+            fontSize: 14,
+            fontWeight: 600,
+            outline: 'none',
           }}
         />
         {hasData && (
           <Btn
             onClick={onSave}
-            style={{ background: '#1e3a5f', border: '1px solid #2563eb', color: COLORS.cleaning }}
+            style={{ background: '#1e3a5f', border: '1px solid #3b82f6', color: '#93c5fd' }}
           >
             💾 저장
           </Btn>
         )}
         {saveMsg && (
-          <span style={{ fontSize: 12, fontWeight: 700, color: COLORS.success }}>{saveMsg}</span>
+          <span style={{ fontSize: 14, fontWeight: 800, color: COLORS.success }}>{saveMsg}</span>
         )}
         {hasData && (
-          <Btn onClick={onReset} title="초기화">🔄</Btn>
+          <Btn onClick={onReset} title="초기화" style={{ padding: '7px 12px', fontWeight: 600 }}>🔄 초기화</Btn>
         )}
       </div>
     </div>

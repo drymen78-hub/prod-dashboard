@@ -18,14 +18,14 @@ interface Props {
   snapshots: DailySnapshot[];
 }
 
-const SectionHeader: React.FC<{ icon: string; label: string }> = ({ icon, label }) => (
+const SectionHeader: React.FC<{ icon: string; label: string; color?: string }> = ({ icon, label, color = COLORS.cleaning }) => (
   <div style={{
     display: 'flex', alignItems: 'center', gap: 8,
-    margin: '10px 0 6px', padding: '4px 0 4px 8px',
-    borderLeft: `3px solid ${COLORS.cleaning}40`,
+    margin: '14px 0 8px', padding: '6px 0 6px 12px',
+    borderLeft: `4px solid ${color}`,
   }}>
-    <span style={{ fontSize: 12 }}>{icon}</span>
-    <span style={{ fontSize: 11, fontWeight: 800, color: '#475569', letterSpacing: '0.05em' }}>{label}</span>
+    <span style={{ fontSize: 14 }}>{icon}</span>
+    <span style={{ fontSize: 13, fontWeight: 800, color: '#d4e8ff', letterSpacing: '0.03em' }}>{label}</span>
   </div>
 );
 
@@ -34,20 +34,23 @@ const NumberInput: React.FC<{
   onChange: (v: number) => void;
   color?: string;
   step?: number;
-  placeholder?: string;
-}> = ({ value, onChange, color = '#f1f5f9', step = 1, placeholder = '0' }) => (
+}> = ({ value, onChange, color = '#f0f6ff', step = 1 }) => (
   <input
     type="number"
     min="0"
     step={step}
     value={value === 0 ? '' : value}
-    placeholder={placeholder}
+    placeholder="0"
     onChange={e => onChange(parseFloat(e.target.value) || 0)}
     style={{
       width: '100%', textAlign: 'center',
-      background: '#0f172a', border: '1px solid #334155',
-      borderRadius: 5, padding: '4px',
-      fontSize: 13, fontWeight: 700, color,
+      background: '#0f1e32',
+      border: '1px solid #3a5a90',
+      borderRadius: 6,
+      padding: '6px 4px',
+      fontSize: 15,
+      fontWeight: 700,
+      color,
       outline: 'none',
     }}
   />
@@ -56,13 +59,10 @@ const NumberInput: React.FC<{
 export const CleaningPanel: React.FC<Props> = ({ tasks, onUpdate, totals, snapshots }) => {
   const activeTasks = tasks.filter(t => n(t.count) > 0 || n(t.hours) > 0);
 
-  // 분류 업무 얼룩체크 건수
   const stainCheckCount = n(tasks.find(t => t.id === '분류')?.stainCheck ?? 0);
   const classifyCount   = n(tasks.find(t => t.id === '분류')?.count ?? 0);
-  const stainCheckRate  = classifyCount > 0
-    ? +((stainCheckCount / classifyCount) * 100).toFixed(1) : 0;
+  const stainCheckRate  = classifyCount > 0 ? +((stainCheckCount / classifyCount) * 100).toFixed(1) : 0;
 
-  // ── 차트 설정 ──────────────────────────────────────────
   const productionConfig = useMemo(() => {
     if (activeTasks.length === 0) return null;
     return createProductionChartConfig(
@@ -103,28 +103,31 @@ export const CleaningPanel: React.FC<Props> = ({ tasks, onUpdate, totals, snapsh
     );
   }, [snapshots]);
 
-  // 그리드 컬럼: 업무 | 설명 | 인원 | 생산량 | 단위 | 시간 | 시간당 | 얼룩체크
-  const COLS = '72px 1fr 80px 80px 52px 72px 64px 76px';
+  // 컬럼: 업무 | 설명 | 인원 | 생산량 | 단위 | 시간 | 시간당 | 얼룩체크
+  const COLS = '70px 1fr 80px 90px 52px 80px 68px 84px';
 
   return (
     <div style={{ flex: 1, minWidth: 0 }}>
       {/* 패널 헤더 */}
       <div style={{
-        background: '#1e293b', border: '1px solid #334155',
-        borderLeft: `4px solid ${COLORS.cleaning}`,
-        borderRadius: 8, padding: '8px 14px', marginBottom: 8,
+        background: '#1a2f50',
+        border: '1px solid #2e4a7a',
+        borderLeft: `5px solid ${COLORS.cleaning}`,
+        borderRadius: 10,
+        padding: '10px 16px',
+        marginBottom: 10,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
-        <div style={{ fontSize: 14, fontWeight: 800, color: COLORS.cleaning }}>🧺 개별클리닝파트</div>
-        <div style={{ fontSize: 10, color: '#475569' }}>바코드 1개 = 의류 1개</div>
+        <div style={{ fontSize: 16, fontWeight: 900, color: COLORS.cleaning }}>🧺 개별클리닝파트</div>
+        <div style={{ fontSize: 12, color: '#7a9cc0', fontWeight: 600 }}>바코드 1개 = 의류 1개</div>
       </div>
 
-      {/* ── 파트 KPI ── */}
+      {/* KPI */}
       <SectionHeader icon="📊" label="파트 합계" />
-      <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
-        <KPICard label="총 인원" value={totals.staff} unit="명" icon="👤" color="#94a3b8" />
-        <KPICard label="총 처리" value={totals.count.toLocaleString()} unit="건" color="#60a5fa" icon="📦" />
-        <KPICard label="투입시간" value={totals.hours} unit="h" color="#94a3b8" icon="⏱" />
+      <div style={{ display: 'flex', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
+        <KPICard label="총 인원" value={totals.staff} unit="명" icon="👤" color="#b8cfe8" />
+        <KPICard label="총 처리량" value={totals.count.toLocaleString()} unit="건" color="#60a5fa" icon="📦" />
+        <KPICard label="총 투입시간" value={totals.hours} unit="h" color="#b8cfe8" icon="⏱" />
         <KPICard
           label="인시당 생산량"
           value={totals.eff}
@@ -139,25 +142,30 @@ export const CleaningPanel: React.FC<Props> = ({ tasks, onUpdate, totals, snapsh
             label="얼룩체크"
             value={stainCheckCount.toLocaleString()}
             unit="건"
-            color="#a78bfa"
+            color="#c4b5fd"
             icon="🔍"
-            sub={`분류의 ${stainCheckRate}%`}
+            sub={`분류 대비 ${stainCheckRate}%`}
           />
         )}
       </div>
 
-      {/* ── 업무 입력 테이블 ── */}
+      {/* 업무 입력 테이블 */}
       <SectionHeader icon="✏️" label="업무별 입력" />
       <div style={{
-        background: '#1e293b', border: '1px solid #334155',
-        borderRadius: 8, overflow: 'hidden', marginBottom: 8,
+        background: '#1a2f50',
+        border: '1px solid #2e4a7a',
+        borderRadius: 10,
+        overflow: 'hidden',
+        marginBottom: 10,
       }}>
-        {/* 헤더 행 */}
+        {/* 헤더 */}
         <div style={{
           display: 'grid', gridTemplateColumns: COLS,
-          background: '#0f172a', padding: '6px 12px',
-          borderBottom: '1px solid #334155',
-          fontSize: 10, fontWeight: 800, color: '#475569', gap: 6,
+          background: '#0f1e32',
+          padding: '8px 14px',
+          borderBottom: '2px solid #2e4a7a',
+          fontSize: 12, fontWeight: 800, color: '#8ab4d8',
+          gap: 6,
         }}>
           <span>업무</span>
           <span>설명</span>
@@ -166,7 +174,7 @@ export const CleaningPanel: React.FC<Props> = ({ tasks, onUpdate, totals, snapsh
           <span style={{ textAlign: 'center' }}>단위</span>
           <span style={{ textAlign: 'center' }}>시간(h)</span>
           <span style={{ textAlign: 'center' }}>시간당</span>
-          <span style={{ textAlign: 'center', color: '#a78bfa' }}>얼룩체크</span>
+          <span style={{ textAlign: 'center', color: '#c4b5fd' }}>얼룩체크</span>
         </div>
 
         {tasks.map((task, i) => {
@@ -175,67 +183,64 @@ export const CleaningPanel: React.FC<Props> = ({ tasks, onUpdate, totals, snapsh
           return (
             <div key={task.id} style={{
               display: 'grid', gridTemplateColumns: COLS,
-              padding: '5px 12px',
-              background: i % 2 === 1 ? '#0f172a20' : 'transparent',
-              borderBottom: '1px solid #1e293b',
+              padding: '8px 14px',
+              background: i % 2 === 0 ? 'transparent' : '#162844',
+              borderBottom: '1px solid #1e3a5f',
               alignItems: 'center', gap: 6,
             }}>
-              <span style={{ fontSize: 12, fontWeight: 800, color }}>{task.label}</span>
-              <span style={{ fontSize: 10, color: '#475569' }}>{task.description}</span>
+              <span style={{
+                fontSize: 14, fontWeight: 900, color,
+              }}>{task.label}</span>
+              <span style={{ fontSize: 12, color: '#8ab4d8', fontWeight: 600 }}>{task.description}</span>
               <NumberInput value={n(task.staff)} onChange={v => onUpdate(task.id, 'staff', v)} color={color} />
               <NumberInput value={n(task.count)} onChange={v => onUpdate(task.id, 'count', v)} color={color} />
-              <span style={{ fontSize: 11, color: '#475569', textAlign: 'center' }}>{task.unit}</span>
-              <NumberInput value={n(task.hours)} onChange={v => onUpdate(task.id, 'hours', v)} color="#94a3b8" step={0.5} />
-              <span style={{ fontSize: 12, fontWeight: 700, color: COLORS.rate, textAlign: 'center' }}>
+              <span style={{ fontSize: 13, color: '#8ab4d8', textAlign: 'center', fontWeight: 700 }}>{task.unit}</span>
+              <NumberInput value={n(task.hours)} onChange={v => onUpdate(task.id, 'hours', v)} color="#b8cfe8" step={0.5} />
+              <span style={{ fontSize: 14, fontWeight: 800, color: COLORS.rate, textAlign: 'center' }}>
                 {m.perHour > 0 ? m.perHour : '—'}
               </span>
-              {/* 얼룩체크: 분류 업무만 입력 가능 */}
               {task.id === '분류' ? (
                 <NumberInput
                   value={n(task.stainCheck ?? 0)}
                   onChange={v => onUpdate(task.id, 'stainCheck', v)}
-                  color="#a78bfa"
-                  placeholder="0"
+                  color="#c4b5fd"
                 />
               ) : (
-                <span style={{ textAlign: 'center', color: '#334155', fontSize: 11 }}>—</span>
+                <span style={{ textAlign: 'center', color: '#2e4a7a', fontSize: 14, fontWeight: 700 }}>—</span>
               )}
             </div>
           );
         })}
       </div>
 
-      {/* ── 분석 차트 ── */}
+      {/* 차트 */}
       {(productionConfig || hoursConfig || effConfig || trendConfig) && (
         <SectionHeader icon="📈" label="분석 차트" />
       )}
-
       <ChartCard
         title="업무별 생산량 및 시간당 효율"
         config={productionConfig}
-        height="200px"
+        height="210px"
         tag="생산량"
         badge={
-          <div style={{ fontSize: 10, color: '#64748b', display: 'flex', gap: 10 }}>
-            <span><span style={{ display: 'inline-block', width: 8, height: 8, background: '#60a5fa80', borderRadius: 2, marginRight: 3 }} />생산량</span>
-            <span><span style={{ display: 'inline-block', width: 10, height: 2, background: '#fbbf24', marginRight: 3, verticalAlign: 'middle' }} />시간당</span>
+          <div style={{ fontSize: 11, color: '#7a9cc0', display: 'flex', gap: 10 }}>
+            <span><span style={{ display: 'inline-block', width: 9, height: 9, background: '#60a5fa80', borderRadius: 2, marginRight: 3 }} />생산량</span>
+            <span><span style={{ display: 'inline-block', width: 12, height: 2, background: '#fbbf24', marginRight: 3, verticalAlign: 'middle' }} />시간당</span>
           </div>
         }
       />
-
-      <div style={{ display: 'flex', gap: 6 }}>
+      <div style={{ display: 'flex', gap: 8 }}>
         <div style={{ flex: 1 }}>
-          <ChartCard title="업무별 투입시간 비율" config={hoursConfig} height="160px" tag="시간분포" />
+          <ChartCard title="업무별 투입시간 비율" config={hoursConfig} height="170px" tag="시간분포" />
         </div>
         <div style={{ flex: 1 }}>
-          <ChartCard title="업무별 인시당 생산량" config={effConfig} height="160px" tag="효율" />
+          <ChartCard title="업무별 인시당 생산량" config={effConfig} height="170px" tag="효율" />
         </div>
       </div>
-
       <ChartCard
         title="날짜별 인시당 생산성 추이"
         config={trendConfig}
-        height="150px"
+        height="160px"
         tag={snapshots.length >= 3 ? 'SPC' : '추이'}
       />
     </div>

@@ -14,22 +14,22 @@ export const ChartCard: React.FC<Props> = ({ title, height = '200px', config, ba
   if (!config) return null;
   return (
     <div style={{
-      background: '#1e293b',
-      border: '1px solid #334155',
-      borderRadius: 8,
-      padding: '10px 12px',
-      marginBottom: 6,
+      background: '#1a2f50',
+      border: '1px solid #2e4a7a',
+      borderRadius: 10,
+      padding: '12px 14px',
+      marginBottom: 8,
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {tag && (
             <span style={{
-              fontSize: 9, fontWeight: 800, color: '#475569',
-              background: '#0f172a', border: '1px solid #334155',
-              borderRadius: 4, padding: '1px 6px', letterSpacing: '0.05em',
+              fontSize: 10, fontWeight: 800, color: '#60a5fa',
+              background: '#0f1e32', border: '1px solid #2e4a7a',
+              borderRadius: 5, padding: '2px 8px', letterSpacing: '0.05em',
             }}>{tag}</span>
           )}
-          <span style={{ fontSize: 11, fontWeight: 700, color: '#e2e8f0' }}>{title}</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: '#d4e8ff' }}>{title}</span>
         </div>
         {badge}
       </div>
