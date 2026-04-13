@@ -9,8 +9,13 @@ export const App: React.FC = () => {
   const {
     reportDate, setReportDate, dateLabel,
     cleaningTasks, updateCleaningTask,
+    cleaningSharedHours, setCleaningSharedHours,
+    cleaningTarget,      setCleaningTarget,
     laundryStaff, updateLaundryStaff,
     laundryTasks, updateLaundryTask,
+    laundrySupportSent,     setLaundrySupportSent,
+    laundrySupportReceived, setLaundrySupportReceived,
+    laundryTarget, setLaundryTarget,
     cleaningTotals, laundryTotals,
     snapshots,
     saved, saveMsg, handleSave, handleReset,
@@ -41,6 +46,10 @@ export const App: React.FC = () => {
         <CleaningPanel
           tasks={cleaningTasks}
           onUpdate={updateCleaningTask}
+          sharedHours={cleaningSharedHours}
+          onSharedHoursChange={setCleaningSharedHours}
+          targetOut={cleaningTarget}
+          onTargetOutChange={setCleaningTarget}
           totals={cleaningTotals}
           snapshots={snapshots}
         />
@@ -49,6 +58,12 @@ export const App: React.FC = () => {
           onStaffChange={updateLaundryStaff}
           tasks={laundryTasks}
           onUpdate={updateLaundryTask}
+          supportSent={laundrySupportSent}
+          onSupportSentChange={setLaundrySupportSent}
+          supportReceived={laundrySupportReceived}
+          onSupportReceivedChange={setLaundrySupportReceived}
+          targetCustomers={laundryTarget}
+          onTargetCustomersChange={setLaundryTarget}
           totals={laundryTotals}
           snapshots={snapshots}
         />

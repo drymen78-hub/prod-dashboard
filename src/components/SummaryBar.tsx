@@ -3,7 +3,7 @@ import { COLORS } from '../constants';
 
 interface Props {
   cleaningTotals: { staff: number; count: number; hours: number; eff: number };
-  laundryTotals:  { staff: number; boxes: number; rolls: number; hours: number; eff: number; wash: number };
+  laundryTotals:  { staff: number; boxes: number; rolls: number; hours: number; eff: number };
   hasData: boolean;
 }
 
@@ -74,9 +74,6 @@ export const SummaryBar: React.FC<Props> = ({ cleaningTotals, laundryTotals, has
               <span style={{ fontSize: 12, color: '#8ab4d8', fontWeight: 600, marginLeft: 8 }}>{laundryTotals.staff}명</span>
             </div>
             <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
-              {laundryTotals.wash > 0 && (
-                <StatCol label="세탁" value={`${laundryTotals.wash.toLocaleString()}건`} />
-              )}
               <StatCol label="생활빨래건조" value={laundryTotals.boxes > 0 ? `${laundryTotals.boxes}박스` : '—'} color="#60a5fa" />
               <StatCol label="이불건조" value={laundryTotals.rolls > 0 ? `${laundryTotals.rolls}롤` : '—'} color="#fb923c" />
               <StatCol label="투입시간" value={laundryTotals.hours > 0 ? `${laundryTotals.hours}h` : '—'} color="#b8cfe8" />

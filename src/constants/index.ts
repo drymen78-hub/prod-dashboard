@@ -1,6 +1,6 @@
 import type { CleaningTask, LaundryTask } from '../types';
 
-// ── 색상 테마 (밝은 버전) ─────────────────────────────────
+// ── 색상 테마 ─────────────────────────────────────────────
 export const COLORS = {
   background: '#0e1e35',
   card:       '#1a2f50',
@@ -17,22 +17,21 @@ export const COLORS = {
   warn:     '#fb923c',
   alert:    '#f87171',
   rate:     '#fbbf24',
+  goal:     '#a78bfa',
 } as const;
 
-// ── 클리닝파트 기본 업무 ──────────────────────────────────
+// ── 클리닝파트 기본 업무 (건조+셔츠 통합, 세탁 없음) ────────
 export const CLEANING_TASKS_DEFAULT: CleaningTask[] = [
-  { id: '분류', label: '분류',  description: '세탁방법 구분',         unit: '건',   staff: 0, count: 0, hours: 0, stainCheck: 0 },
-  { id: '기계', label: '기계',  description: '드라이클리닝 투입/회수', unit: '건',   staff: 0, count: 0, hours: 0 },
-  { id: '웨트', label: '웨트',  description: '물세탁 전처리+세탁기',   unit: '건',   staff: 0, count: 0, hours: 0 },
-  { id: '건조', label: '건조',  description: '기계+자연건조',          unit: '건',   staff: 0, count: 0, hours: 0 },
-  { id: '셔츠', label: '셔츠',  description: '셔츠 건조 후 카트 담기', unit: '카트', staff: 0, count: 0, hours: 0 },
-  { id: 'QC',  label: 'QC',    description: '드라이클리닝 검수',      unit: '건',   staff: 0, count: 0, hours: 0 },
+  { id: '분류',    label: '분류',    description: '세탁방법 구분',               unit: '건', staff: 0, count: 0, stainCheck: 0 },
+  { id: '기계',    label: '기계',    description: '드라이클리닝 투입/회수',       unit: '건', staff: 0, count: 0 },
+  { id: '웨트',    label: '웨트',    description: '물세탁 전처리+세탁기',         unit: '건', staff: 0, count: 0 },
+  { id: '건조&셔츠', label: '건조&셔츠', description: '기계+자연건조 · 셔츠카트', unit: '건', staff: 0, count: 0 },
+  { id: 'QC',     label: 'QC',     description: '드라이클리닝 검수',            unit: '건', staff: 0, count: 0, qcHours: 0, stainCheck: 0 },
 ];
 
-// ── 런드리파트 기본 업무 ──────────────────────────────────
+// ── 런드리파트 기본 업무 (세탁 제거) ─────────────────────
 export const LAUNDRY_TASKS_DEFAULT: LaundryTask[] = [
-  { id: '세탁',        label: '세탁',        description: '생활빨래+리빙 물세탁', unit: '건',      count: 0, hours: 0 },
-  { id: '생활빨래건조', label: '생활빨래건조', description: '고객구분 후 2단건조기', unit: '박스',    count: 0, hours: 0 },
+  { id: '생활빨래건조', label: '생활빨래건조', description: '고객구분 후 2단건조기', unit: '박스',     count: 0, hours: 0 },
   { id: '이불건조',    label: '이불건조',     description: '리빙류 대형건조기',     unit: '롤테이너', count: 0, hours: 0 },
 ];
 
@@ -43,16 +42,14 @@ export const STORAGE_KEYS = {
 
 // ── 업무별 색상 ───────────────────────────────────────────
 export const CLEANING_TASK_COLORS: Record<string, string> = {
-  '분류': '#60a5fa',
-  '기계': '#818cf8',
-  '웨트': '#a78bfa',
-  '건조': '#34d399',
-  '셔츠': '#fbbf24',
-  'QC':  '#f87171',
+  '분류':    '#60a5fa',
+  '기계':    '#818cf8',
+  '웨트':    '#a78bfa',
+  '건조&셔츠': '#34d399',
+  'QC':    '#f87171',
 };
 
 export const LAUNDRY_TASK_COLORS: Record<string, string> = {
-  '세탁':        '#34d399',
   '생활빨래건조': '#60a5fa',
   '이불건조':    '#fb923c',
 };
