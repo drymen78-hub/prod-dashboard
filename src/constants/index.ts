@@ -1,4 +1,4 @@
-import { OrderColor, ProcessStatusMap, DashboardState, HandoverSection, KickerSlot } from '../types';
+import { OrderColor, ProcessStatusMap, DashboardState, HandoverSection, KickerSlot, LaundryState } from '../types';
 
 export interface ColorInfo { bg: string; text: string; label: string; }
 
@@ -38,6 +38,23 @@ export const DEFAULT_NOTES: HandoverSection = {
   incomplete: '', issues: '', dayTeamRequest: '', other: '',
 };
 
+export const DEFAULT_LAUNDRY: LaundryState = {
+  staff: 0,
+  foldingDryBox: 0,
+  livingDryRT: 0,
+  breakdown35kg: 0,
+  breakdown50kg: 0,
+  breakdown2stage: 0,
+  breakdown60kg: 0,
+};
+
+export const MACHINE_TOTALS = {
+  breakdown35kg:  { label: '35kg 세탁기',  total: 17, unit: '대' },
+  breakdown50kg:  { label: '50kg 세탁기',  total: 5,  unit: '대' },
+  breakdown2stage: { label: '2단 건조기',  total: 80, unit: '대' },
+  breakdown60kg:  { label: '60kg 건조기',  total: 6,  unit: '대' },
+} as const;
+
 export const DEFAULT_KICKERS: KickerSlot[] = [1, 2, 3, 4].map(i => ({
   id: String(i), on: false, slots: 0,
 }));
@@ -53,6 +70,7 @@ export const DEFAULT_STATE: DashboardState = {
   washMethodCount: 0,
   targetCount: 0,
   workHours: 0,
+  laundry: DEFAULT_LAUNDRY,
   notes: DEFAULT_NOTES,
   kickers: DEFAULT_KICKERS,
   savedAt: '',

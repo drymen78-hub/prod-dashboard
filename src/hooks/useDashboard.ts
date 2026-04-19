@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
-import { DashboardState, ProcessKey, ProcessStatus, ProcessStatusMap, OrderColor, HandoverSection, KickerSlot } from '../types';
-import { DEFAULT_STATE, DEFAULT_NOTES, DEFAULT_KICKERS } from '../constants';
+import { DashboardState, ProcessKey, ProcessStatus, ProcessStatusMap, OrderColor, HandoverSection, KickerSlot, LaundryState } from '../types';
+import { DEFAULT_STATE, DEFAULT_NOTES, DEFAULT_KICKERS, DEFAULT_LAUNDRY } from '../constants';
 
 const STORAGE_KEY = 'shift-handover-v3';
 const HISTORY_KEY  = 'shift-history-v2';
@@ -23,6 +23,7 @@ function load(): DashboardState {
       ...parsed,
       staff: { ...DEFAULT_STATE.staff, ...(parsed.staff ?? {}) },
       processStatus: { ...DEFAULT_STATE.processStatus, ...(parsed.processStatus ?? {}) } as ProcessStatusMap,
+      laundry: { ...DEFAULT_LAUNDRY, ...(parsed.laundry ?? {}) } as LaundryState,
       notes,
       kickers: (parsed.kickers ?? structuredClone(DEFAULT_KICKERS)) as KickerSlot[],
       workSequence: (parsed.workSequence ?? []) as OrderColor[],
@@ -70,6 +71,13 @@ export function useDashboard() {
   const updateNote = useCallback((field: keyof HandoverSection, val: string) => {
     setState(s => {
       const next = { ...s, notes: { ...s.notes, [field]: val } };
+      persist(next); return next;
+    });
+  }, []);
+
+  const updateLaundry = useCallback((field: keyof LaundryState, val: number) => {
+    setState(s => {
+      const next = { ...s, laundry: { ...s.laundry, [field]: val } };
       persist(next); return next;
     });
   }, []);
@@ -153,7 +161,7 @@ export function useDashboard() {
   return {
     state, set,
     updateStaff, updateWorkSequence, updateProcessStatus, updateIntensiveCareColors,
-    updateNote, updateKicker,
+    updateNote, updateLaundry, updateKicker,
     handleReset, saveRecord,
     totalStaff, totalCount, expectedTotal, processingRate,
   };

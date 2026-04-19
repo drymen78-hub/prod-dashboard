@@ -6,7 +6,7 @@ export type ProcessKey = 'classification' | 'dryCleaning' | 'wet' | 'shirts';
 
 export interface ProcessStatus {
   color: OrderColor | '';
-  progress: number; // 0–100
+  progress: number;
 }
 
 export type ProcessStatusMap = Record<ProcessKey, ProcessStatus>;
@@ -33,6 +33,16 @@ export interface KickerSlot {
   slots: number;
 }
 
+export interface LaundryState {
+  staff: number;
+  foldingDryBox: number;
+  livingDryRT: number;
+  breakdown35kg: number;
+  breakdown50kg: number;
+  breakdown2stage: number;
+  breakdown60kg: number;
+}
+
 export interface DashboardState {
   date: string;
   staff: StaffCounts;
@@ -44,6 +54,7 @@ export interface DashboardState {
   washMethodCount: number;
   targetCount: number;
   workHours: number;
+  laundry: LaundryState;
   notes: HandoverSection;
   kickers: KickerSlot[];
   savedAt: string;

@@ -5,19 +5,33 @@ import { ShiftHeader } from './components/ShiftHeader';
 import { StaffPanel } from './components/StaffPanel';
 import { WorkOrderSection } from './components/WorkOrderSection';
 import { StatsPanel } from './components/StatsPanel';
-import { HandoverNotes } from './components/HandoverNotes';
 import { KickerPanel } from './components/KickerPanel';
+import { LaundrySectionPanel } from './components/LaundrySectionPanel';
+import { HandoverNotes } from './components/HandoverNotes';
 import { saveToSheets } from './utils/saveToSheets';
 import { ProcessKey, ProcessStatus } from './types';
 
 type ToastType = 'success' | 'error' | 'loading';
 interface Toast { msg: string; type: ToastType }
 
+function SectionLabel({ emoji, title, color }: { emoji: string; title: string; color: string }) {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 8,
+      padding: '8px 16px', marginBottom: 4,
+      background: color, borderRadius: 8,
+    }}>
+      <span style={{ fontSize: 16 }}>{emoji}</span>
+      <span style={{ fontSize: 14, fontWeight: 900, color: '#fff', letterSpacing: 0.5 }}>{title}</span>
+    </div>
+  );
+}
+
 export const App: React.FC = () => {
   const {
     state, set, updateStaff,
     updateWorkSequence, updateProcessStatus, updateIntensiveCareColors,
-    updateNote, updateKicker, handleReset,
+    updateNote, updateLaundry, updateKicker, handleReset,
     totalStaff, totalCount, expectedTotal, processingRate,
   } = useDashboard();
 
@@ -33,7 +47,7 @@ export const App: React.FC = () => {
     }
   }, []);
 
-  // 캡처 버튼: Sheets 저장 → 화면 캡처 순서
+  // 캡처 버튼: Sheets 저장 → 화면 캡처
   const handleCapture = useCallback(async () => {
     showToast('Google Sheets에 저장 중…', 'loading');
     try {
@@ -43,7 +57,6 @@ export const App: React.FC = () => {
       showToast('Sheets 저장 실패 — 캡처만 진행합니다', 'error', 2000);
     }
 
-    // 잠시 후 캡처
     await new Promise(r => setTimeout(r, 600));
 
     const el = contentRef.current;
@@ -60,7 +73,6 @@ export const App: React.FC = () => {
     link.download = `세탁인계_${state.date}.png`;
     link.href = canvas.toDataURL('image/png');
     link.click();
-
     showToast('✓ 캡처 완료', 'success');
   }, [state, totalStaff, processingRate, showToast]);
 
@@ -102,8 +114,10 @@ export const App: React.FC = () => {
         onCapture={handleCapture}
       />
 
-      <div ref={contentRef} style={{ background: '#dde3ec', padding: '4px 0 6px', borderRadius: 8 }}>
-        {/* 2. 인원 현황 */}
+      <div ref={contentRef} style={{ background: '#dde3ec', padding: '8px 8px 10px', borderRadius: 8 }}>
+
+        {/* 2. 개별클리닝파트 */}
+        <SectionLabel emoji="🧪" title="개별클리닝파트" color="#1e3a5f" />
         <StaffPanel
           staff={state.staff}
           totalStaff={totalStaff}
@@ -113,8 +127,6 @@ export const App: React.FC = () => {
           onTargetChange={v => set('targetCount', v)}
           onWorkHoursChange={v => set('workHours', v)}
         />
-
-        {/* 3. 작업 현황 */}
         <WorkOrderSection
           workSequence={state.workSequence}
           processStatus={state.processStatus}
@@ -123,8 +135,6 @@ export const App: React.FC = () => {
           onProcessStatusChange={(key: ProcessKey, status: ProcessStatus) => updateProcessStatus(key, status)}
           onIntensiveCareChange={updateIntensiveCareColors}
         />
-
-        {/* 4. 처리 통계 */}
         <StatsPanel
           totalCount={totalCount}
           avgItemsPerUnit={state.avgItemsPerUnit}
@@ -136,12 +146,15 @@ export const App: React.FC = () => {
           onAvgChange={v => set('avgItemsPerUnit', v)}
           onWashCountChange={v => set('washMethodCount', v)}
         />
-
-        {/* 5. 인수인계 메모 */}
-        <HandoverNotes notes={state.notes} onUpdate={updateNote} />
-
-        {/* 6. 키커 현황 */}
         <KickerPanel kickers={state.kickers} onUpdate={updateKicker} />
+
+        {/* 3. 런드리파트 */}
+        <SectionLabel emoji="🧺" title="런드리파트" color="#0e7490" />
+        <LaundrySectionPanel laundry={state.laundry} onUpdate={updateLaundry} />
+
+        {/* 4. 인수인계 메모 (공통) */}
+        <SectionLabel emoji="💬" title="인수인계 메모 (공통)" color="#6d28d9" />
+        <HandoverNotes notes={state.notes} onUpdate={updateNote} />
       </div>
 
       <div style={{ height: 20 }} />

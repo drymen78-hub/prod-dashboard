@@ -24,13 +24,13 @@ export function ShiftHeader({ date, savedAt, onDateChange, onReset, onCapture }:
       {/* 좌측: 제목 */}
       <div>
         <div style={{
-          fontSize: 28, fontWeight: 900, color: '#60a5fa',
-          letterSpacing: 1, marginBottom: 4,
+          fontSize: 26, fontWeight: 900, color: '#60a5fa',
+          letterSpacing: 0.5, marginBottom: 6,
         }}>
           🌙 세탁 인계 상황 공유 · 야간 → 주간
         </div>
         <div style={{
-          fontSize: 28, fontWeight: 900, color: '#fff',
+          fontSize: 26, fontWeight: 900, color: '#fff',
           letterSpacing: -0.5, lineHeight: 1.2,
         }}>
           {formatDate(date)}
