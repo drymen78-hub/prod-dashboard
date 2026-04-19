@@ -138,32 +138,30 @@ export const App: React.FC = () => {
             />
           </div>
 
-          {/* ── 우: 공정별 진행단계 ── */}
+          {/* ── 우: 공정별 진행단계 + 인수인계 메모 ── */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+            <StatsPanel
+              processStatus={state.processStatus}
+              avgItemsPerUnit={state.avgItemsPerUnit}
+              washMethodCount={state.washMethodCount}
+              expectedTotal={expectedTotal}
+              processingRate={processingRate}
+              classificationStaff={state.staff.classification}
+              editMode={editMode}
+              onProcessStatusChange={(key: ProcessKey, status: ProcessStatus) => updateProcessStatus(key, status)}
+              onAvgChange={v => set('avgItemsPerUnit', v)}
+              onWashCountChange={v => set('washMethodCount', v)}
+            />
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-              <StatsPanel
-                processStatus={state.processStatus}
-                avgItemsPerUnit={state.avgItemsPerUnit}
-                washMethodCount={state.washMethodCount}
-                expectedTotal={expectedTotal}
-                processingRate={processingRate}
-                classificationStaff={state.staff.classification}
+              <HandoverNotes
+                notes={state.notes}
                 editMode={editMode}
-                onProcessStatusChange={(key: ProcessKey, status: ProcessStatus) => updateProcessStatus(key, status)}
-                onAvgChange={v => set('avgItemsPerUnit', v)}
-                onWashCountChange={v => set('washMethodCount', v)}
+                onUpdate={updateNote}
               />
             </div>
           </div>
 
         </div>
-
-        {/* 인수인계 메모 — 전체 너비 */}
-        <HandoverNotes
-          notes={state.notes}
-          editMode={editMode}
-          onUpdate={updateNote}
-        />
       </div>
 
       <div style={{ height: 20 }} />
