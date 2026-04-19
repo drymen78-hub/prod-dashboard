@@ -20,7 +20,7 @@ export function ShiftHeader({
         marginBottom: 12, boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
       }}
     >
-      <span style={{ fontSize: 14, fontWeight: 800, color: '#1e293b' }}>
+      <span style={{ fontSize: 32, fontWeight: 800, color: '#1e293b' }}>
         🧺 야간 인계 대시보드
       </span>
 
@@ -60,7 +60,7 @@ export function ShiftHeader({
             fontSize: 13, fontWeight: 700, cursor: 'pointer',
           }}
         >
-          📸 저장·캡처
+          📸 캡처
         </button>
 
         {/* 초기화 */}

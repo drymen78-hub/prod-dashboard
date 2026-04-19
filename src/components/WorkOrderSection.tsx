@@ -18,10 +18,6 @@ export function WorkOrderSection({
 }: Props) {
   const [colorPickerOpen, setColorPickerOpen] = useState(false);
 
-  const totalCount = workSequence.reduce(
-    (s, c) => s + (workSequenceCounts[c] || 0), 0,
-  );
-
   const toggleSequence = (color: OrderColor) => {
     if (workSequence.includes(color)) {
       onSequenceChange(workSequence.filter(c => c !== color));
@@ -49,16 +45,6 @@ export function WorkOrderSection({
 
       <div className="card-header">
         <h2>📋 작업 순서 및 건수</h2>
-        {totalCount > 0 && (
-          <span style={{
-            marginLeft: 8,
-            background: '#1e3a5f', color: '#93c5fd',
-            borderRadius: 20, padding: '2px 10px',
-            fontSize: 12, fontWeight: 800, fontVariantNumeric: 'tabular-nums',
-          }}>
-            오늘 목표 {totalCount.toLocaleString()}건
-          </span>
-        )}
         {editMode && (
           <button
             onClick={() => setColorPickerOpen(o => !o)}

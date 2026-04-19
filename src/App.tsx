@@ -8,9 +8,7 @@ import { StaffPanel } from './components/StaffPanel';
 import { WorkOrderSection } from './components/WorkOrderSection';
 import { StatsPanel } from './components/StatsPanel';
 import { KickerPanel } from './components/KickerPanel';
-import { LaundrySectionPanel } from './components/LaundrySectionPanel';
 import { HandoverNotes } from './components/HandoverNotes';
-import { saveToSheets } from './utils/saveToSheets';
 import { ProcessKey, ProcessStatus } from './types';
 
 type ToastType = 'success' | 'error' | 'loading';
@@ -21,7 +19,7 @@ export const App: React.FC = () => {
     state, set, updateStaff,
     updateWorkSequence, updateWorkSequenceCount,
     updateProcessStatus, updateIntensiveCareColors,
-    updateNote, updateLaundry, updateKicker, handleReset,
+    updateNote, updateKicker, handleReset,
     totalStaff, totalCount, expectedTotal, processingRate,
   } = useDashboard();
 
@@ -39,14 +37,7 @@ export const App: React.FC = () => {
   }, []);
 
   const handleCapture = useCallback(async () => {
-    showToast('Google Sheets에 저장 중…', 'loading');
-    try {
-      await saveToSheets(state, totalStaff, processingRate);
-      showToast('✓ 저장 완료, 캡처 중…', 'success', 1500);
-    } catch {
-      showToast('Sheets 저장 실패 — 캡처만 진행합니다', 'error', 2000);
-    }
-    await new Promise(r => setTimeout(r, 600));
+    showToast('캡처 중…', 'loading');
     const el = contentRef.current;
     if (!el) return;
     const prev = el.style.background;
@@ -60,7 +51,7 @@ export const App: React.FC = () => {
     link.href = canvas.toDataURL('image/png');
     link.click();
     showToast('✓ 캡처 완료', 'success');
-  }, [state, totalStaff, processingRate, showToast]);
+  }, [state, showToast]);
 
   const toastBg: Record<ToastType, string> = {
     success: '#059669', error: '#dc2626', loading: '#1e3a5f',
@@ -121,9 +112,9 @@ export const App: React.FC = () => {
         />
 
         {/* 2컬럼 메인 그리드 */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.25fr', gap: 12, alignItems: 'stretch' }}>
 
-          {/* ── 좌: 공정별 진행률 + 품질 체크 ── */}
+          {/* ── 좌: 작업순서 + 인원 + 키커 ── */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             <WorkOrderSection
               workSequence={state.workSequence}
@@ -134,22 +125,6 @@ export const App: React.FC = () => {
               onSequenceCountChange={updateWorkSequenceCount}
               onIntensiveCareChange={updateIntensiveCareColors}
             />
-            <StatsPanel
-              processStatus={state.processStatus}
-              avgItemsPerUnit={state.avgItemsPerUnit}
-              washMethodCount={state.washMethodCount}
-              expectedTotal={expectedTotal}
-              processingRate={processingRate}
-              classificationStaff={state.staff.classification}
-              editMode={editMode}
-              onProcessStatusChange={(key: ProcessKey, status: ProcessStatus) => updateProcessStatus(key, status)}
-              onAvgChange={v => set('avgItemsPerUnit', v)}
-              onWashCountChange={v => set('washMethodCount', v)}
-            />
-          </div>
-
-          {/* ── 우: 인원 + 키커 + 런드리 + 메모 ── */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             <StaffPanel
               staff={state.staff}
               totalStaff={totalStaff}
@@ -161,19 +136,34 @@ export const App: React.FC = () => {
               editMode={editMode}
               onUpdate={updateKicker}
             />
-            <LaundrySectionPanel
-              laundry={state.laundry}
-              editMode={editMode}
-              onUpdate={updateLaundry}
-            />
-            <HandoverNotes
-              notes={state.notes}
-              editMode={editMode}
-              onUpdate={updateNote}
-            />
+          </div>
+
+          {/* ── 우: 공정별 진행단계 ── */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <StatsPanel
+                processStatus={state.processStatus}
+                avgItemsPerUnit={state.avgItemsPerUnit}
+                washMethodCount={state.washMethodCount}
+                expectedTotal={expectedTotal}
+                processingRate={processingRate}
+                classificationStaff={state.staff.classification}
+                editMode={editMode}
+                onProcessStatusChange={(key: ProcessKey, status: ProcessStatus) => updateProcessStatus(key, status)}
+                onAvgChange={v => set('avgItemsPerUnit', v)}
+                onWashCountChange={v => set('washMethodCount', v)}
+              />
+            </div>
           </div>
 
         </div>
+
+        {/* 인수인계 메모 — 전체 너비 */}
+        <HandoverNotes
+          notes={state.notes}
+          editMode={editMode}
+          onUpdate={updateNote}
+        />
       </div>
 
       <div style={{ height: 20 }} />

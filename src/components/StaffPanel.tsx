@@ -18,10 +18,7 @@ const COLORS: Record<string, string> = {
   support:        '#78716c',
 };
 
-export function StaffPanel({ staff, totalStaff, editMode, onUpdate }: Props) {
-  const totalDisplay = Number.isInteger(totalStaff)
-    ? String(totalStaff) : totalStaff.toFixed(1);
-
+export function StaffPanel({ staff, editMode, onUpdate }: Props) {
   return (
     <div className="card" style={{ marginBottom: 10 }}>
       <div className="card-header">
@@ -31,14 +28,6 @@ export function StaffPanel({ staff, totalStaff, editMode, onUpdate }: Props) {
             (0.5 단위)
           </span>
         )}
-        <span style={{
-          marginLeft: 'auto',
-          background: '#1e3a5f', color: '#93c5fd',
-          borderRadius: 20, padding: '2px 12px',
-          fontSize: 13, fontWeight: 800, fontVariantNumeric: 'tabular-nums',
-        }}>
-          총 {totalDisplay}명
-        </span>
       </div>
 
       <div style={{

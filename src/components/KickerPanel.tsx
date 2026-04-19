@@ -14,15 +14,6 @@ export function KickerPanel({ kickers, editMode, onUpdate }: Props) {
     <div className="card" style={{ marginBottom: 10 }}>
       <div className="card-header">
         <h2>⚙️ 키커 현황</h2>
-        <span style={{
-          marginLeft: 'auto',
-          background: isOn ? '#dcfce7' : '#f1f5f9',
-          color: isOn ? '#16a34a' : '#94a3b8',
-          borderRadius: 20, padding: '2px 10px',
-          fontSize: 12, fontWeight: 700,
-        }}>
-          {isOn ? `가동 중 · ${kicker.slots || 0}슬롯` : '미가동'}
-        </span>
       </div>
 
       <div style={{ padding: '10px 14px 12px' }}>

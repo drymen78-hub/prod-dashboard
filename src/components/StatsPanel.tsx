@@ -43,7 +43,7 @@ export function StatsPanel({
     processingRate >= 50 ? '#d97706' : '#dc2626';
 
   return (
-    <div className="card" style={{ marginBottom: 10 }}>
+    <div className="card" style={{ flex: 1, marginBottom: 0 }}>
       {colorPickerKey !== null && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 100 }} onClick={() => setColorPickerKey(null)} />
       )}
@@ -81,7 +81,7 @@ export function StatsPanel({
                 transition: 'border-color 0.2s, background 0.2s',
               }}>
                 {/* 공정 이름 */}
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 7 }}>
+                <div style={{ fontSize: 17, fontWeight: 800, color: '#334155', marginBottom: 7 }}>
                   {label}
                 </div>
 
@@ -94,7 +94,7 @@ export function StatsPanel({
                       background: col ? col.bg : '#e2e8f0',
                       color: col ? col.text : '#94a3b8',
                       borderRadius: 5, padding: '4px 7px', marginBottom: 8,
-                      fontSize: 11, fontWeight: 800, cursor: 'pointer',
+                      fontSize: 13, fontWeight: 800, cursor: 'pointer',
                       border: isOpen ? '2px solid #1e293b' : '2px solid transparent',
                       userSelect: 'none',
                     }}
@@ -104,15 +104,16 @@ export function StatsPanel({
                   </div>
                 ) : (
                   col ? (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
                       <span style={{
-                        width: 8, height: 8, borderRadius: '50%',
-                        background: col.bg, display: 'inline-block',
-                      }} />
-                      <span style={{ fontSize: 11, fontWeight: 700, color: '#475569' }}>{col.label}</span>
+                        display: 'inline-block',
+                        background: col.bg, color: col.text,
+                        borderRadius: 5, padding: '3px 10px',
+                        fontSize: 17, fontWeight: 800,
+                      }}>{col.label}</span>
                     </div>
                   ) : (
-                    <div style={{ height: 20, marginBottom: 8 }} />
+                    <div style={{ height: 28, marginBottom: 8 }} />
                   )
                 )}
 
@@ -192,14 +193,15 @@ export function StatsPanel({
                   stage ? (
                     <div style={{
                       display: 'inline-block',
-                      background: stage.color, color: '#fff',
-                      borderRadius: 5, padding: '4px 10px',
-                      fontSize: 13, fontWeight: 800,
+                      background: stage.color + '22', color: stage.color,
+                      border: `1px solid ${stage.color}55`,
+                      borderRadius: 4, padding: '2px 7px',
+                      fontSize: 10, fontWeight: 800,
                     }}>
                       {stage.label}
                     </div>
                   ) : (
-                    <span style={{ fontSize: 12, color: '#d1d5db', fontWeight: 600 }}>
+                    <span style={{ fontSize: 11, color: '#d1d5db', fontWeight: 600 }}>
                       {col ? '단계 미설정' : '—'}
                     </span>
                   )
@@ -246,22 +248,6 @@ export function StatsPanel({
             )}
           </div>
 
-          {/* 인당 평균 분류건수 */}
-          {perPersonAvg !== null && (
-            <div style={{ borderLeft: '2px solid #e2e8f0', paddingLeft: 16 }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: '#64748b', marginBottom: 4 }}>
-                인당 평균 분류건수
-              </div>
-              <div style={{ fontSize: 20, fontWeight: 800, color: '#2563eb', fontVariantNumeric: 'tabular-nums' }}>
-                {perPersonAvg.toLocaleString()}
-                <span style={{ fontSize: 12, fontWeight: 600, color: '#64748b', marginLeft: 3 }}>개</span>
-              </div>
-              <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 2 }}>
-                총 {washMethodCount.toLocaleString()}개 · 분류 {classificationStaff}명
-              </div>
-            </div>
-          )}
-
           {/* 전주 동요일 건당개별수 */}
           <div>
             <div style={{ fontSize: 10, fontWeight: 700, color: '#64748b', marginBottom: 4 }}>
@@ -290,19 +276,35 @@ export function StatsPanel({
             )}
           </div>
 
-          {/* 처리율 */}
-          <div style={{ marginLeft: 'auto', textAlign: 'right' }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: '#64748b', marginBottom: 4 }}>
-              처리율 (야간분류 / 예상출고)
-            </div>
-            <div style={{ fontSize: 24, fontWeight: 900, color: processingRate > 0 ? rateColor : '#d1d5db', fontVariantNumeric: 'tabular-nums' }}>
-              {processingRate > 0 ? `${processingRate}%` : '—'}
-            </div>
-            {expectedTotal > 0 && washMethodCount > 0 && (
-              <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 2 }}>
-                {washMethodCount.toLocaleString()} ÷ {expectedTotal.toLocaleString()} × 100
+          {/* 인당 평균 분류건수 + 처리율 */}
+          <div style={{ marginLeft: 'auto', textAlign: 'right', display: 'flex', gap: 20, alignItems: 'flex-start' }}>
+            {perPersonAvg !== null && (
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: '#64748b', marginBottom: 4 }}>
+                  인당 평균 분류건수
+                </div>
+                <div style={{ fontSize: 20, fontWeight: 800, color: '#2563eb', fontVariantNumeric: 'tabular-nums' }}>
+                  {perPersonAvg.toLocaleString()}
+                  <span style={{ fontSize: 12, fontWeight: 600, color: '#64748b', marginLeft: 3 }}>개</span>
+                </div>
+                <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 2 }}>
+                  총 {washMethodCount.toLocaleString()}개 · 분류 {classificationStaff}명
+                </div>
               </div>
             )}
+            <div style={{ textAlign: 'right' }}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: '#64748b', marginBottom: 4 }}>
+                처리율 (야간분류 / 예상출고)
+              </div>
+              <div style={{ fontSize: 24, fontWeight: 900, color: processingRate > 0 ? rateColor : '#d1d5db', fontVariantNumeric: 'tabular-nums' }}>
+                {processingRate > 0 ? `${processingRate}%` : '—'}
+              </div>
+              {expectedTotal > 0 && washMethodCount > 0 && (
+                <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 2 }}>
+                  {washMethodCount.toLocaleString()} ÷ {expectedTotal.toLocaleString()} × 100
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
