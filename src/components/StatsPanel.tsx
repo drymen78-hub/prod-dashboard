@@ -1,6 +1,10 @@
+import { WorkOrder } from '../types';
+import { STAGE_MAP } from '../constants';
+
 interface Props {
   avgItemsPerUnit: number; washMethodCount: number; totalCount: number;
   expectedTotal: number; processingRate: number;
+  workOrders: WorkOrder[];
   onAvgChange: (v: number) => void; onWashCountChange: (v: number) => void;
 }
 
@@ -9,6 +13,13 @@ interface CardProps {
   accent?: boolean; highlight?: boolean;
   editable?: boolean; onEdit?: (v: number) => void; rawValue?: number;
   step?: string;
+}
+
+function calcProgress(wo: WorkOrder): number {
+  const fields = ['classification', 'dryCleaning', 'intensiveCare', 'wet', 'shirts'] as const;
+  const active = fields.filter(f => wo[f] !== '');
+  if (active.length === 0) return 0;
+  return Math.round(active.reduce((s, f) => s + STAGE_MAP[wo[f]].weight, 0) / active.length);
 }
 
 function StatCard({ label, value, sub, accent, highlight, editable, onEdit, rawValue, step }: CardProps) {
@@ -41,8 +52,16 @@ function StatCard({ label, value, sub, accent, highlight, editable, onEdit, rawV
   );
 }
 
-export function StatsPanel({ avgItemsPerUnit, washMethodCount, totalCount, expectedTotal, processingRate, onAvgChange, onWashCountChange }: Props) {
+export function StatsPanel({ avgItemsPerUnit, washMethodCount, totalCount, expectedTotal, processingRate, workOrders, onAvgChange, onWashCountChange }: Props) {
   const unprocessed = Math.max(0, expectedTotal - washMethodCount);
+
+  // 작업지시 진행 현황 집계
+  const activeOrders = workOrders.filter(wo => wo.count > 0);
+  const doneCount   = activeOrders.filter(wo => calcProgress(wo) === 100).length;
+  const inProgCount = activeOrders.filter(wo => { const p = calcProgress(wo); return p > 0 && p < 100; }).length;
+  const notStarted  = activeOrders.filter(wo => calcProgress(wo) === 0).length;
+  const totalActive = activeOrders.length;
+
   return (
     <div className="card" style={{ marginBottom: 12 }}>
       <div className="section-header">
@@ -55,6 +74,72 @@ export function StatsPanel({ avgItemsPerUnit, washMethodCount, totalCount, expec
           </span>
         )}
       </div>
+
+      {/* 작업지시 현황 가로 막대 차트 */}
+      {totalActive > 0 && (
+        <div style={{ padding: '12px 16px 8px' }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 6 }}>
+            작업지시 현황 — 활성 {totalActive}개
+          </div>
+          {/* 스택 바 */}
+          <div style={{ display: 'flex', height: 22, borderRadius: 6, overflow: 'hidden', gap: 2 }}>
+            {doneCount > 0 && (
+              <div title={`완료 ${doneCount}개`} style={{
+                flex: doneCount, background: '#22c55e',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 10, fontWeight: 800, color: '#fff',
+                minWidth: 24, transition: 'flex 0.3s',
+              }}>
+                {doneCount}
+              </div>
+            )}
+            {inProgCount > 0 && (
+              <div title={`진행중 ${inProgCount}개`} style={{
+                flex: inProgCount, background: '#f59e0b',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 10, fontWeight: 800, color: '#fff',
+                minWidth: 24, transition: 'flex 0.3s',
+              }}>
+                {inProgCount}
+              </div>
+            )}
+            {notStarted > 0 && (
+              <div title={`미진행 ${notStarted}개`} style={{
+                flex: notStarted, background: '#cbd5e1',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 10, fontWeight: 800, color: '#475569',
+                minWidth: 24, transition: 'flex 0.3s',
+              }}>
+                {notStarted}
+              </div>
+            )}
+          </div>
+          {/* 범례 */}
+          <div style={{ display: 'flex', gap: 12, marginTop: 5 }}>
+            {doneCount > 0 && (
+              <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: '#15803d', fontWeight: 700 }}>
+                <span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: '#22c55e' }} />
+                완료 {doneCount}
+              </span>
+            )}
+            {inProgCount > 0 && (
+              <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: '#92400e', fontWeight: 700 }}>
+                <span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: '#f59e0b' }} />
+                진행중 {inProgCount}
+              </span>
+            )}
+            {notStarted > 0 && (
+              <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: '#475569', fontWeight: 700 }}>
+                <span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: '#cbd5e1' }} />
+                미진행 {notStarted}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* 구분선 */}
+      {totalActive > 0 && <div style={{ height: 1, background: '#e2e8f0', margin: '0 16px' }} />}
 
       {/* 상단: 입력 카드 + 예상처리율 */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, padding: '12px 16px' }}>
@@ -95,7 +180,7 @@ export function StatsPanel({ avgItemsPerUnit, washMethodCount, totalCount, expec
         </div>
       )}
 
-      {/* 하단 핵심 수치 - 크게 */}
+      {/* 하단 핵심 수치 */}
       {totalCount > 0 && (
         <div style={{
           borderTop: '1px solid #e2e8f0',
@@ -103,7 +188,6 @@ export function StatsPanel({ avgItemsPerUnit, washMethodCount, totalCount, expec
           display: 'grid',
           gridTemplateColumns: avgItemsPerUnit > 0 && washMethodCount > 0 && expectedTotal > 0 ? 'repeat(3,1fr)' : avgItemsPerUnit > 0 ? 'repeat(2,1fr)' : '1fr',
         }}>
-          {/* 총 투입 건수 */}
           <div style={{ padding: '12px 16px', textAlign: 'center', borderRight: '1px solid #e2e8f0' }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 4 }}>총 투입 건수</div>
             <div style={{ fontSize: 32, fontWeight: 900, color: '#1e293b', lineHeight: 1 }}>
@@ -111,7 +195,6 @@ export function StatsPanel({ avgItemsPerUnit, washMethodCount, totalCount, expec
               <span style={{ fontSize: 14, fontWeight: 700, color: '#64748b', marginLeft: 3 }}>건</span>
             </div>
           </div>
-          {/* 예상 개별 총계 */}
           {avgItemsPerUnit > 0 && (
             <div style={{ padding: '12px 16px', textAlign: 'center', borderRight: washMethodCount > 0 && expectedTotal > 0 ? '1px solid #e2e8f0' : undefined }}>
               <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 4 }}>예상 개별 총계</div>
@@ -121,7 +204,6 @@ export function StatsPanel({ avgItemsPerUnit, washMethodCount, totalCount, expec
               </div>
             </div>
           )}
-          {/* 미처리 예상 */}
           {washMethodCount > 0 && expectedTotal > 0 && (
             <div style={{ padding: '12px 16px', textAlign: 'center' }}>
               <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 4 }}>미처리 예상</div>

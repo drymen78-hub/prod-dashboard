@@ -1,11 +1,6 @@
-import { OrderColor, ProcessStage, WorkOrder, DashboardState } from '../types';
+import { OrderColor, ProcessStage, WorkOrder, DashboardState, HandoverSection, KickerSlot } from '../types';
 
-export interface ColorInfo {
-  bg: string;
-  text: string;
-  light: string;
-  label: string;
-}
+export interface ColorInfo { bg: string; text: string; light: string; label: string; }
 
 export const ORDER_COLOR_MAP: Record<OrderColor, ColorInfo> = {
   파랑: { bg: '#2563eb', text: '#fff', light: '#eff6ff', label: '파랑' },
@@ -19,13 +14,7 @@ export const ORDER_COLOR_MAP: Record<OrderColor, ColorInfo> = {
   초록: { bg: '#16a34a', text: '#fff', light: '#f0fdf4', label: '초록' },
 };
 
-export interface StageInfo {
-  bg: string;
-  text: string;
-  border: string;
-  label: string;
-  weight: number;
-}
+export interface StageInfo { bg: string; text: string; border: string; label: string; weight: number; }
 
 export const STAGE_MAP: Record<ProcessStage, StageInfo> = {
   '':   { bg: '#f8fafc', text: '#94a3b8', border: '#e2e8f0', label: '—',    weight: 0   },
@@ -47,9 +36,22 @@ export const DEFAULT_WORK_ORDERS: WorkOrder[] = ORDER_COLORS.map((color, i) => (
   count: 0,
   classification: '' as ProcessStage,
   dryCleaning:    '' as ProcessStage,
+  intensiveCare:  '' as ProcessStage,
   wet:            '' as ProcessStage,
   shirts:         '' as ProcessStage,
-  intensiveCare:  '' as ProcessStage,
+}));
+
+export const DEFAULT_NOTES: HandoverSection = {
+  incomplete: '',
+  issues: '',
+  dayTeamRequest: '',
+  other: '',
+};
+
+export const DEFAULT_KICKERS: KickerSlot[] = [1, 2, 3, 4].map(i => ({
+  id: String(i),
+  on: false,
+  slots: 0,
 }));
 
 export const DEFAULT_STATE: DashboardState = {
@@ -58,14 +60,14 @@ export const DEFAULT_STATE: DashboardState = {
   workOrders: DEFAULT_WORK_ORDERS,
   avgItemsPerUnit: 0,
   washMethodCount: 0,
-  notes: '',
+  targetCount: 0,
+  workHours: 0,
+  notes: DEFAULT_NOTES,
+  kickers: DEFAULT_KICKERS,
   savedAt: '',
 };
 
-export const STAFF_POSITIONS: Array<{
-  key: keyof DashboardState['staff'];
-  label: string;
-}> = [
+export const STAFF_POSITIONS: Array<{ key: keyof DashboardState['staff']; label: string }> = [
   { key: 'classification', label: '분류'        },
   { key: 'machine',        label: '기계'        },
   { key: 'qc',             label: 'QC'          },
@@ -74,17 +76,12 @@ export const STAFF_POSITIONS: Array<{
   { key: 'support',        label: '지원 및 기타' },
 ];
 
-export type StageField =
-  | 'classification'
-  | 'dryCleaning'
-  | 'wet'
-  | 'shirts'
-  | 'intensiveCare';
+export type StageField = 'classification' | 'dryCleaning' | 'intensiveCare' | 'wet' | 'shirts';
 
-export const STAGE_COLUMNS: Array<{ key: StageField; label: string }> = [
-  { key: 'classification', label: '대분류'       },
-  { key: 'dryCleaning',   label: '드라이클리닝'  },
-  { key: 'wet',           label: '웨트'          },
-  { key: 'shirts',        label: '셔츠'          },
-  { key: 'intensiveCare', label: '집중케어세탁'  },
+// 카드 레이아웃에서 보여줄 주요 컬럼 (intensiveCare는 dryCleaning 배지로 처리)
+export const STAGE_COLUMNS: Array<{ key: StageField; label: string; desc: string }> = [
+  { key: 'classification', label: '대분류',      desc: '세탁물 기본 분류' },
+  { key: 'dryCleaning',    label: '드라이클리닝', desc: '드라이케어 진행'  },
+  { key: 'wet',            label: '웨트',         desc: '웨트세탁 진행'   },
+  { key: 'shirts',         label: '셔츠',         desc: '셔츠세탁 진행'   },
 ];
