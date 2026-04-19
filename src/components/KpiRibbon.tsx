@@ -125,9 +125,9 @@ export function KpiRibbon({
         barColor={rateColor}
       />
 
-      {/* 오늘 작업량 */}
+      {/* 총출고목표건수 */}
       <KpiCard
-        icon="📦" label="오늘 작업량"
+        icon="📦" label="총출고목표건수"
         value={totalCount > 0 ? `${totalCount.toLocaleString()}건` : '—'}
         valueColor={workColor}
         sub={targetCount > 0 ? `목표 ${targetCount.toLocaleString()}건` : ''}
