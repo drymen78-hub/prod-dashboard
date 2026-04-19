@@ -5,11 +5,11 @@ interface Props {
   onUpdate: (field: keyof HandoverSection, val: string) => void;
 }
 
-const SECTIONS: Array<{ key: keyof HandoverSection; label: string; placeholder: string }> = [
-  { key: 'incomplete',     label: '미완료 항목',  placeholder: '야간 미완료 작업을 입력하세요' },
-  { key: 'issues',         label: '특이사항',     placeholder: '특이사항이나 주의 사항을 입력하세요' },
-  { key: 'dayTeamRequest', label: '주간팀 요청',  placeholder: '주간팀에 요청할 사항을 입력하세요' },
-  { key: 'other',          label: '기타',          placeholder: '기타 전달 사항을 입력하세요' },
+const SECTIONS: Array<{ key: keyof HandoverSection; emoji: string; label: string; placeholder: string }> = [
+  { key: 'incomplete',     emoji: '📦', label: '장비 특이사항',  placeholder: '장비 관련 특이사항을 입력하세요' },
+  { key: 'issues',         emoji: '👥', label: '인원 특이사항',  placeholder: '인원 관련 특이사항을 입력하세요' },
+  { key: 'dayTeamRequest', emoji: '🤝', label: '지원 현황',      placeholder: '지원 현황을 입력하세요' },
+  { key: 'other',          emoji: '💬', label: '기타 특이사항',  placeholder: '기타 전달 사항을 입력하세요' },
 ];
 
 const ACCENT: Record<keyof HandoverSection, string> = {
@@ -33,13 +33,13 @@ export function HandoverNotes({ notes, onUpdate }: Props) {
             background: '#fef9c3', color: '#854d0e',
             borderRadius: 20, padding: '2px 10px',
           }}>
-            ⚠ 주간팀 전달 확인 필요
+            ⚠ 전달 내용 있음
           </span>
         )}
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, padding: '12px 16px' }}>
-        {SECTIONS.map(({ key, label, placeholder }) => {
+        {SECTIONS.map(({ key, emoji, label, placeholder }) => {
           const accent = ACCENT[key];
           const filled = notes[key].trim() !== '';
           return (
@@ -50,8 +50,8 @@ export function HandoverNotes({ notes, onUpdate }: Props) {
               display: 'flex', flexDirection: 'column', gap: 6,
               transition: 'border-color 0.2s, background 0.2s',
             }}>
-              <div style={{ fontSize: 11, fontWeight: 800, color: filled ? accent : '#94a3b8', letterSpacing: 0.3 }}>
-                {label}
+              <div style={{ fontSize: 12, fontWeight: 800, color: filled ? accent : '#94a3b8' }}>
+                {emoji} {label}
               </div>
               <textarea
                 value={notes[key]}

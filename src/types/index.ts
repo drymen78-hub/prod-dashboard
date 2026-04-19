@@ -1,6 +1,6 @@
 export type OrderColor =
   | '파랑' | '주황' | '골드' | '분홍' | '검정'
-  | '노랑' | '민트' | '보라' | '초록';
+  | '노랑' | '민트' | '보라' | '초록' | '회색';
 
 export type ProcessKey = 'classification' | 'dryCleaning' | 'wet' | 'shirts';
 
@@ -16,15 +16,16 @@ export interface StaffCounts {
   machine: number;
   qc: number;
   wet: number;
+  pretreatment: number;
   dryShirts: number;
   support: number;
 }
 
 export interface HandoverSection {
-  incomplete: string;
-  issues: string;
-  dayTeamRequest: string;
-  other: string;
+  incomplete: string;     // 장비 특이사항
+  issues: string;         // 인원 특이사항
+  dayTeamRequest: string; // 지원 현황
+  other: string;          // 기타 특이사항
 }
 
 export interface KickerSlot {
@@ -37,19 +38,15 @@ export interface LaundryState {
   staff: number;
   foldingDryBox: number;
   livingDryRT: number;
-  breakdown35kg: number;
-  breakdown50kg: number;
-  breakdown2stage: number;
-  breakdown60kg: number;
 }
 
 export interface DashboardState {
   date: string;
   staff: StaffCounts;
   workSequence: OrderColor[];
+  workSequenceCounts: Partial<Record<OrderColor, number>>;
   processStatus: ProcessStatusMap;
   intensiveCareColors: OrderColor[];
-  totalCount: number;
   avgItemsPerUnit: number;
   washMethodCount: number;
   targetCount: number;
