@@ -63,7 +63,7 @@ export function LaundrySectionPanel({ laundry, editMode, onUpdate }: Props) {
             borderRadius: 8, padding: '10px 12px',
           }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 6 }}>
-              폴딩인계 건조
+              폴딩인계 건조완성
             </div>
 
             {editMode ? (
@@ -103,7 +103,7 @@ export function LaundrySectionPanel({ laundry, editMode, onUpdate }: Props) {
               }} />
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
-              <span style={{ fontSize: 10, color: '#94a3b8' }}>/ {FOLDING_DRY_CAPACITY}box</span>
+              <span style={{ fontSize: 10, color: '#94a3b8' }}>7시간 최대 가동가능수 약 365회</span>
               <span style={{ fontSize: 11, fontWeight: 800, color: barColor }}>
                 {foldingRate}%
               </span>
