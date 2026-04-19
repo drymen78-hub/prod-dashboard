@@ -138,7 +138,6 @@ export const App: React.FC = () => {
               processStatus={state.processStatus}
               avgItemsPerUnit={state.avgItemsPerUnit}
               washMethodCount={state.washMethodCount}
-              totalCount={totalCount}
               expectedTotal={expectedTotal}
               processingRate={processingRate}
               editMode={editMode}

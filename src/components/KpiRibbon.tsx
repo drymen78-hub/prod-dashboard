@@ -92,7 +92,6 @@ export function KpiRibbon({
   const rateColor =
     processingRate >= 80 ? '#16a34a' :
     processingRate >= 50 ? '#d97706' : '#dc2626';
-  const rateDelta = processingRate > 0 ? processingRate - 80 : null;
 
   /* 2. 오늘 작업량 */
   const targetRatio = targetCount > 0 && totalCount > 0
@@ -121,15 +120,6 @@ export function KpiRibbon({
           expectedTotal > 0
             ? `${washMethodCount.toLocaleString()} / ${expectedTotal.toLocaleString()}개`
             : '수치 미입력'
-        }
-        badge={
-          rateDelta !== null
-            ? {
-                text: `${rateDelta >= 0 ? '+' : ''}${rateDelta.toFixed(1)}%p`,
-                color: rateDelta >= 0 ? '#16a34a' : '#dc2626',
-                bg: rateDelta >= 0 ? '#dcfce7' : '#fee2e2',
-              }
-            : undefined
         }
         barFill={Math.min(processingRate, 100)}
         barColor={rateColor}

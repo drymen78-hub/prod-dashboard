@@ -21,7 +21,7 @@ export function DashboardBanner({ date, savedAt }: Props) {
       {/* 좌: 제목 */}
       <div>
         <div style={{ fontSize: 18, fontWeight: 800, color: '#1e293b', letterSpacing: -0.3 }}>
-          🧺 개별 클리닝 파트 · 야간 인계
+          🧺 개별 클리닝 파트
         </div>
         <div style={{ fontSize: 11, fontWeight: 500, color: '#64748b', marginTop: 3 }}>
           야간조 작성 · 주간조 인수 대기 중

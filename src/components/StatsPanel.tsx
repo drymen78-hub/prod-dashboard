@@ -2,11 +2,24 @@ import { useState } from 'react';
 import { ProcessStatusMap, ProcessKey, ProcessStatus, OrderColor } from '../types';
 import { PROCESS_KEYS, PROCESS_LABELS, ORDER_COLOR_MAP, ORDER_COLORS } from '../constants';
 
+// progress 값을 단계로 매핑: 33=초반, 66=중반, 100=후반, 0=미시작
+const STAGES = [
+  { label: '초반', value: 33,  color: '#d97706', bg: '#fffbeb', border: '#fde68a' },
+  { label: '중반', value: 66,  color: '#2563eb', bg: '#eff6ff', border: '#93c5fd' },
+  { label: '후반', value: 100, color: '#16a34a', bg: '#f0fdf4', border: '#86efac' },
+] as const;
+
+function progressToStage(progress: number) {
+  if (progress >= 100) return STAGES[2];
+  if (progress >= 66)  return STAGES[1];
+  if (progress >= 1)   return STAGES[0];
+  return null;
+}
+
 interface Props {
   processStatus: ProcessStatusMap;
   avgItemsPerUnit: number;
   washMethodCount: number;
-  totalCount: number;
   expectedTotal: number;
   processingRate: number;
   editMode: boolean;
@@ -33,47 +46,43 @@ export function StatsPanel({
       )}
 
       <div className="card-header">
-        <h2>✅ 공정 품질 체크</h2>
+        <h2>✅ 공정별 진행단계</h2>
         {processingRate > 0 && (
           <span style={{
-            marginLeft: 'auto', fontSize: 13, fontWeight: 900,
-            color: rateColor,
+            marginLeft: 'auto', fontSize: 13, fontWeight: 900, color: rateColor,
           }}>
-            처리율 {processingRate}%
-            {processingRate >= 80 ? ' ✓' : ''}
+            처리율 {processingRate}%{processingRate >= 80 ? ' ✓' : ''}
           </span>
         )}
       </div>
 
       <div style={{ padding: '10px 14px 14px', display: 'flex', flexDirection: 'column', gap: 12 }}>
 
-        {/* 4 process quality cards */}
+        {/* 4 process stage cards */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
           {PROCESS_KEYS.map(key => {
             const { label } = PROCESS_LABELS[key];
             const status = processStatus[key];
             const col = status.color ? ORDER_COLOR_MAP[status.color] : null;
-            const prog = status.progress;
-            const done = prog >= 100;
-            const mid  = prog >= 40 && prog < 100;
+            const stage = progressToStage(status.progress);
             const isOpen = colorPickerKey === key;
 
-            const cardBg = !col ? '#f8fafc' : done ? '#f0fdf4' : mid ? '#fffbeb' : '#f8fafc';
-            const cardBorder = !col ? '#e2e8f0' : done ? '#86efac' : mid ? '#fde68a' : '#e2e8f0';
-            const progColor = done ? '#16a34a' : mid ? '#d97706' : '#94a3b8';
+            const cardBg = !col ? '#f8fafc' : stage ? stage.bg : '#f8fafc';
+            const cardBorder = !col ? '#e2e8f0' : stage ? stage.border : '#e2e8f0';
 
             return (
               <div key={key} style={{
                 background: cardBg, border: `1.5px solid ${cardBorder}`,
-                borderRadius: 8, padding: '10px 10px 8px',
+                borderRadius: 8, padding: '10px 10px 10px',
                 position: 'relative',
                 transition: 'border-color 0.2s, background 0.2s',
               }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 6 }}>
+                {/* 공정 이름 */}
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 7 }}>
                   {label}
                 </div>
 
-                {/* Color indicator */}
+                {/* 색상 표시 / 선택 */}
                 {editMode ? (
                   <div
                     onClick={e => { e.stopPropagation(); setColorPickerKey(isOpen ? null : key); }}
@@ -81,33 +90,33 @@ export function StatsPanel({
                       display: 'flex', alignItems: 'center', gap: 5,
                       background: col ? col.bg : '#e2e8f0',
                       color: col ? col.text : '#94a3b8',
-                      borderRadius: 5, padding: '4px 7px', marginBottom: 7,
+                      borderRadius: 5, padding: '4px 7px', marginBottom: 8,
                       fontSize: 11, fontWeight: 800, cursor: 'pointer',
                       border: isOpen ? '2px solid #1e293b' : '2px solid transparent',
                       userSelect: 'none',
                     }}
                   >
                     {col ? col.label : '색상▾'}
-                    <span style={{ fontSize: 8, opacity: 0.7, marginLeft: 1 }}>▼</span>
+                    <span style={{ fontSize: 8, opacity: 0.7 }}>▼</span>
                   </div>
                 ) : (
-                  col && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 7 }}>
+                  col ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 8 }}>
                       <span style={{
                         width: 8, height: 8, borderRadius: '50%',
-                        background: col.bg, display: 'inline-block', flexShrink: 0,
+                        background: col.bg, display: 'inline-block',
                       }} />
-                      <span style={{ fontSize: 11, fontWeight: 700, color: '#475569' }}>
-                        {col.label}
-                      </span>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: '#475569' }}>{col.label}</span>
                     </div>
+                  ) : (
+                    <div style={{ height: 20, marginBottom: 8 }} />
                   )
                 )}
 
-                {/* Color picker dropdown */}
+                {/* 색상 피커 드롭다운 */}
                 {isOpen && editMode && (
                   <div onClick={e => e.stopPropagation()} style={{
-                    position: 'absolute', top: 70, left: 0, zIndex: 200,
+                    position: 'absolute', top: 72, left: 0, zIndex: 200,
                     background: '#fff', border: '1px solid #e2e8f0',
                     borderRadius: 8, padding: 8,
                     boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
@@ -141,54 +150,56 @@ export function StatsPanel({
                   </div>
                 )}
 
-                {/* Progress display / input */}
+                {/* 단계 선택 (편집) / 표시 (보기) */}
                 {editMode ? (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <input type="number" min={0} max={100}
-                      value={status.progress || ''} placeholder="0"
-                      disabled={!status.color}
-                      onChange={e => {
-                        const v = Math.min(100, Math.max(0, Number(e.target.value)));
-                        onProcessStatusChange(key, { ...status, progress: v });
-                      }}
-                      style={{
-                        flex: 1, height: 28,
-                        border: `1.5px solid ${col ? col.bg + '66' : '#e2e8f0'}`,
-                        borderRadius: 5, textAlign: 'center',
-                        fontSize: 14, fontWeight: 900, color: '#1e293b',
-                        background: status.color ? '#fff' : '#f1f5f9',
-                        outline: 'none', opacity: status.color ? 1 : 0.4,
-                        cursor: status.color ? 'text' : 'not-allowed',
-                      }}
-                    />
-                    <span style={{ fontSize: 11, fontWeight: 700, color: '#64748b' }}>%</span>
-                  </div>
-                ) : (
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 2 }}>
-                    {col ? (
-                      <>
-                        <span style={{
-                          fontSize: 20, fontWeight: 900, color: progColor,
-                          fontVariantNumeric: 'tabular-nums',
-                        }}>
-                          {done ? '✓' : ''}{prog}
-                        </span>
-                        <span style={{ fontSize: 12, fontWeight: 700, color: progColor }}>%</span>
-                      </>
-                    ) : (
-                      <span style={{ fontSize: 13, fontWeight: 600, color: '#d1d5db' }}>—</span>
+                  <div style={{ display: 'flex', gap: 4 }}>
+                    {STAGES.map(s => {
+                      const active = status.progress === s.value;
+                      return (
+                        <button key={s.label}
+                          disabled={!status.color}
+                          onClick={() => onProcessStatusChange(key, { ...status, progress: s.value })}
+                          style={{
+                            flex: 1, padding: '4px 2px',
+                            background: active ? s.color : '#fff',
+                            color: active ? '#fff' : status.color ? '#64748b' : '#d1d5db',
+                            border: `1.5px solid ${active ? s.color : '#e2e8f0'}`,
+                            borderRadius: 5, fontSize: 10, fontWeight: 800, cursor: status.color ? 'pointer' : 'not-allowed',
+                            opacity: status.color ? 1 : 0.4,
+                          }}
+                        >
+                          {s.label}
+                        </button>
+                      );
+                    })}
+                    {/* 초기화 버튼 */}
+                    {status.progress > 0 && (
+                      <button
+                        onClick={() => onProcessStatusChange(key, { ...status, progress: 0 })}
+                        style={{
+                          padding: '4px 5px',
+                          background: '#fff', color: '#94a3b8',
+                          border: '1.5px solid #e2e8f0',
+                          borderRadius: 5, fontSize: 10, cursor: 'pointer',
+                        }}
+                      >✕</button>
                     )}
                   </div>
-                )}
-
-                {/* Mini bar */}
-                {col && (
-                  <div style={{ height: 3, background: '#e2e8f0', borderRadius: 2, marginTop: 6, overflow: 'hidden' }}>
+                ) : (
+                  stage ? (
                     <div style={{
-                      height: '100%', width: `${prog}%`,
-                      background: progColor, borderRadius: 2, transition: 'width 0.3s',
-                    }} />
-                  </div>
+                      display: 'inline-block',
+                      background: stage.color, color: '#fff',
+                      borderRadius: 5, padding: '4px 10px',
+                      fontSize: 13, fontWeight: 800,
+                    }}>
+                      {stage.label}
+                    </div>
+                  ) : (
+                    <span style={{ fontSize: 12, color: '#d1d5db', fontWeight: 600 }}>
+                      {col ? '단계 미설정' : '—'}
+                    </span>
+                  )
                 )}
               </div>
             );
@@ -260,7 +271,7 @@ export function StatsPanel({
             )}
           </div>
 
-          {/* 예상 총출고 + 처리율 */}
+          {/* 처리율 */}
           <div style={{ marginLeft: 'auto', textAlign: 'right' }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: '#64748b', marginBottom: 4 }}>
               처리율 (야간분류 / 예상출고)
