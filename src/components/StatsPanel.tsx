@@ -22,6 +22,7 @@ interface Props {
   washMethodCount: number;
   expectedTotal: number;
   processingRate: number;
+  classificationStaff: number;
   editMode: boolean;
   onProcessStatusChange: (key: ProcessKey, status: ProcessStatus) => void;
   onAvgChange: (v: number) => void;
@@ -30,9 +31,11 @@ interface Props {
 
 export function StatsPanel({
   processStatus, avgItemsPerUnit, washMethodCount,
-  expectedTotal, processingRate, editMode,
+  expectedTotal, processingRate, classificationStaff, editMode,
   onProcessStatusChange, onAvgChange, onWashCountChange,
 }: Props) {
+  const perPersonAvg = classificationStaff > 0 && washMethodCount > 0
+    ? Math.round(washMethodCount / classificationStaff) : null;
   const [colorPickerKey, setColorPickerKey] = useState<ProcessKey | null>(null);
 
   const rateColor =
@@ -242,6 +245,22 @@ export function StatsPanel({
               </div>
             )}
           </div>
+
+          {/* 인당 평균 분류건수 */}
+          {perPersonAvg !== null && (
+            <div style={{ borderLeft: '2px solid #e2e8f0', paddingLeft: 16 }}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: '#64748b', marginBottom: 4 }}>
+                인당 평균 분류건수
+              </div>
+              <div style={{ fontSize: 20, fontWeight: 800, color: '#2563eb', fontVariantNumeric: 'tabular-nums' }}>
+                {perPersonAvg.toLocaleString()}
+                <span style={{ fontSize: 12, fontWeight: 600, color: '#64748b', marginLeft: 3 }}>개</span>
+              </div>
+              <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 2 }}>
+                총 {washMethodCount.toLocaleString()}개 · 분류 {classificationStaff}명
+              </div>
+            </div>
+          )}
 
           {/* 전주 동요일 건당개별수 */}
           <div>

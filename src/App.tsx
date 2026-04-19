@@ -140,6 +140,7 @@ export const App: React.FC = () => {
               washMethodCount={state.washMethodCount}
               expectedTotal={expectedTotal}
               processingRate={processingRate}
+              classificationStaff={state.staff.classification}
               editMode={editMode}
               onProcessStatusChange={(key: ProcessKey, status: ProcessStatus) => updateProcessStatus(key, status)}
               onAvgChange={v => set('avgItemsPerUnit', v)}

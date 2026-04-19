@@ -130,7 +130,7 @@ export function KpiRibbon({
         icon="📦" label="오늘 작업량"
         value={totalCount > 0 ? `${totalCount.toLocaleString()}건` : '—'}
         valueColor={workColor}
-        sub={targetCount > 0 ? `목표 ${targetCount.toLocaleString()}건` : '목표 미입력'}
+        sub={targetCount > 0 ? `목표 ${targetCount.toLocaleString()}건` : ''}
         badge={
           targetRatio !== null
             ? {
