@@ -110,21 +110,6 @@ export function KpiRibbon({
       display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
       gap: 12, marginBottom: 16,
     }}>
-      {/* 처리율 — hero */}
-      <KpiCard
-        icon="🎯" label="처리율"
-        hero heroColor={rateColor}
-        value={processingRate > 0 ? `${processingRate}%` : '—'}
-        valueColor={rateColor}
-        sub={
-          expectedTotal > 0
-            ? `${washMethodCount.toLocaleString()} / ${expectedTotal.toLocaleString()}개`
-            : '수치 미입력'
-        }
-        barFill={Math.min(processingRate, 100)}
-        barColor={rateColor}
-      />
-
       {/* 총출고목표건수 */}
       <KpiCard
         icon="📦" label="총출고목표건수"
@@ -142,6 +127,21 @@ export function KpiRibbon({
         }
         barFill={targetCount > 0 ? Math.min((totalCount / targetCount) * 100, 100) : (totalCount > 0 ? 40 : 0)}
         barColor={targetRatio !== null && targetRatio >= 100 ? '#16a34a' : '#d97706'}
+      />
+
+      {/* 총출고개별수 처리율 — hero */}
+      <KpiCard
+        icon="🎯" label="총출고개별수 처리율"
+        hero heroColor={rateColor}
+        value={processingRate > 0 ? `${processingRate}%` : '—'}
+        valueColor={rateColor}
+        sub={
+          expectedTotal > 0
+            ? `${washMethodCount.toLocaleString()} / ${expectedTotal.toLocaleString()}개`
+            : '수치 미입력'
+        }
+        barFill={Math.min(processingRate, 100)}
+        barColor={rateColor}
       />
 
       {/* 야간 인원 */}
