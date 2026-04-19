@@ -112,10 +112,7 @@ export const App: React.FC = () => {
         <SectionLabel emoji="🧪" title="개별클리닝파트" color="#1e3a5f" />
         <StaffPanel
           staff={state.staff} totalStaff={totalStaff}
-          targetCount={state.targetCount} workHours={state.workHours}
           onUpdate={updateStaff}
-          onTargetChange={v => set('targetCount', v)}
-          onWorkHoursChange={v => set('workHours', v)}
         />
         <WorkOrderSection
           workSequence={state.workSequence}

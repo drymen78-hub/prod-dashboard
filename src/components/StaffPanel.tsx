@@ -4,11 +4,7 @@ import { STAFF_POSITIONS } from '../constants';
 interface Props {
   staff: DashboardState['staff'];
   totalStaff: number;
-  targetCount: number;
-  workHours: number;
   onUpdate: (key: keyof DashboardState['staff'], val: number) => void;
-  onTargetChange: (v: number) => void;
-  onWorkHoursChange: (v: number) => void;
 }
 
 const COLORS: Record<string, string> = {
@@ -16,7 +12,7 @@ const COLORS: Record<string, string> = {
   wet: '#0891b2', pretreatment: '#f97316', dryShirts: '#059669', support: '#78716c',
 };
 
-export function StaffPanel({ staff, totalStaff, targetCount, workHours, onUpdate, onTargetChange, onWorkHoursChange }: Props) {
+export function StaffPanel({ staff, totalStaff, onUpdate }: Props) {
   const totalDisplay = Number.isInteger(totalStaff) ? String(totalStaff) : totalStaff.toFixed(1);
 
   return (
@@ -90,55 +86,6 @@ export function StaffPanel({ staff, totalStaff, targetCount, workHours, onUpdate
         </div>
       )}
 
-      {/* 목표건수 · 근무시간 */}
-      <div style={{
-        display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8,
-        padding: '8px 16px 12px', borderTop: '1px solid #e2e8f0', marginTop: 4,
-      }}>
-        <div style={{
-          background: targetCount > 0 ? '#1e3a5f0f' : '#f8fafc',
-          border: `1.5px solid ${targetCount > 0 ? '#1e3a5f44' : '#e2e8f0'}`,
-          borderRadius: 10, padding: '10px 14px',
-          display: 'flex', alignItems: 'center', gap: 12,
-        }}>
-          <div>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 3 }}>목표건수</div>
-            <div style={{ fontSize: 10, color: '#94a3b8' }}>야간 처리 목표</div>
-          </div>
-          <input type="number" min={0}
-            value={targetCount || ''} placeholder="0"
-            onChange={e => onTargetChange(Number(e.target.value))}
-            style={{
-              flex: 1, height: 36, border: `1.5px solid ${targetCount > 0 ? '#1e3a5f66' : '#e2e8f0'}`,
-              borderRadius: 8, textAlign: 'center', fontSize: 18, fontWeight: 900,
-              color: '#1e293b', background: '#fff', outline: 'none',
-            }}
-          />
-          <span style={{ fontSize: 13, fontWeight: 700, color: '#64748b', flexShrink: 0 }}>건</span>
-        </div>
-
-        <div style={{
-          background: workHours > 0 ? '#0891b20f' : '#f8fafc',
-          border: `1.5px solid ${workHours > 0 ? '#0891b244' : '#e2e8f0'}`,
-          borderRadius: 10, padding: '10px 14px',
-          display: 'flex', alignItems: 'center', gap: 12,
-        }}>
-          <div>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', marginBottom: 3 }}>근무시간</div>
-            <div style={{ fontSize: 10, color: '#94a3b8' }}>야간 근무 시간</div>
-          </div>
-          <input type="number" min={0} step={0.5}
-            value={workHours || ''} placeholder="0"
-            onChange={e => onWorkHoursChange(parseFloat(e.target.value) || 0)}
-            style={{
-              flex: 1, height: 36, border: `1.5px solid ${workHours > 0 ? '#0891b266' : '#e2e8f0'}`,
-              borderRadius: 8, textAlign: 'center', fontSize: 18, fontWeight: 900,
-              color: '#1e293b', background: '#fff', outline: 'none',
-            }}
-          />
-          <span style={{ fontSize: 13, fontWeight: 700, color: '#64748b', flexShrink: 0 }}>시간</span>
-        </div>
-      </div>
     </div>
   );
 }
