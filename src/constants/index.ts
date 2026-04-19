@@ -72,6 +72,6 @@ export const STAFF_POSITIONS: Array<{ key: keyof DashboardState['staff']; label:
   { key: 'qc',             label: 'QC'          },
   { key: 'wet',            label: '웨트'        },
   { key: 'pretreatment',   label: '전처리'      },
-  { key: 'dryShirts',      label: '집중&셔츠'   },
+  { key: 'dryShirts',      label: '건조&셔츠'   },
   { key: 'support',        label: '지원 및 기타' },
 ];
