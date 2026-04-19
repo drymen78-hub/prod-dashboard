@@ -49,10 +49,12 @@ export async function saveToSheets(
 
   const payload = buildSheetsPayload(state, totalStaff, processingRate);
 
+  // no-cors 모드에서는 Content-Type: application/json이 브라우저에 의해 차단됨.
+  // 헤더 없이 body만 전송하면 text/plain으로 전달되며,
+  // Apps Script에서 e.postData.contents 로 JSON 파싱 가능.
   await fetch(SCRIPT_URL, {
     method: 'POST',
     mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
 }
