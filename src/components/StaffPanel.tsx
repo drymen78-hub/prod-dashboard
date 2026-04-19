@@ -33,37 +33,34 @@ export function StaffPanel({ staff, totalStaff, onUpdate }: Props) {
           const val = staff[pos.key] || 0;
           const color = COLORS[pos.key] || '#78716c';
           const active = val > 0;
-          const displayVal = Number.isInteger(val) ? String(val) : val.toFixed(1);
-
           return (
             <div key={pos.key} style={{
               background: active ? color + '0f' : '#f8fafc',
               border: `2px solid ${active ? color + '55' : '#e2e8f0'}`,
-              borderRadius: 10, padding: '10px 8px 8px',
-              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+              borderRadius: 10, padding: '10px 8px 10px',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
               transition: 'border-color 0.2s, background 0.2s',
             }}>
-              <div style={{ fontSize: 12, fontWeight: 900, color: active ? color : '#94a3b8', letterSpacing: 0.3, textAlign: 'center' }}>
+              <div style={{ fontSize: 13, fontWeight: 900, color: active ? color : '#94a3b8', letterSpacing: 0.3, textAlign: 'center' }}>
                 {pos.label}
               </div>
-              <input
-                type="number" min={0} step={0.5}
-                value={val || ''} placeholder="0"
-                onChange={e => {
-                  const v = parseFloat(e.target.value);
-                  onUpdate(pos.key, isNaN(v) ? 0 : v);
-                }}
-                style={{
-                  width: 52, height: 32,
-                  border: `2px solid ${active ? color + '66' : '#e2e8f0'}`,
-                  borderRadius: 8, textAlign: 'center',
-                  fontSize: 18, fontWeight: 900, color: '#1e293b', background: '#fff',
-                  outline: 'none',
-                }}
-              />
-              <div style={{ fontSize: 20, fontWeight: 900, color: active ? color : '#d1d5db', lineHeight: 1 }}>
-                {displayVal}
-                <span style={{ fontSize: 11, fontWeight: 700, marginLeft: 2, color: active ? color + 'aa' : '#d1d5db' }}>명</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <input
+                  type="number" min={0} step={0.5}
+                  value={val || ''} placeholder="0"
+                  onChange={e => {
+                    const v = parseFloat(e.target.value);
+                    onUpdate(pos.key, isNaN(v) ? 0 : v);
+                  }}
+                  style={{
+                    width: 52, height: 36,
+                    border: `2px solid ${active ? color + '66' : '#e2e8f0'}`,
+                    borderRadius: 8, textAlign: 'center',
+                    fontSize: 20, fontWeight: 900, color: '#1e293b', background: '#fff',
+                    outline: 'none',
+                  }}
+                />
+                <span style={{ fontSize: 14, fontWeight: 800, color: active ? color : '#94a3b8' }}>명</span>
               </div>
             </div>
           );
