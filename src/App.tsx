@@ -3,23 +3,22 @@ import html2canvas from 'html2canvas';
 import { useDashboard } from './hooks/useDashboard';
 import { ShiftHeader } from './components/ShiftHeader';
 import { StaffPanel } from './components/StaffPanel';
-import { WorkOrderTable } from './components/WorkOrderTable';
+import { WorkOrderSection } from './components/WorkOrderSection';
 import { StatsPanel } from './components/StatsPanel';
 import { HandoverNotes } from './components/HandoverNotes';
 import { KickerPanel } from './components/KickerPanel';
-import { StageField } from './constants';
-import { ProcessStage, OrderColor } from './types';
 import { saveToSheets } from './utils/saveToSheets';
+import { ProcessKey, ProcessStatus } from './types';
 
 type ToastType = 'success' | 'error' | 'loading';
 interface Toast { msg: string; type: ToastType }
 
 export const App: React.FC = () => {
   const {
-    state, set, updateStaff, updateWorkOrder, updateWorkOrderColor,
+    state, set, updateStaff,
+    updateWorkSequence, updateProcessStatus, updateIntensiveCareColors,
     updateNote, updateKicker, handleReset,
     totalStaff, totalCount, expectedTotal, processingRate,
-    saveRecord,
   } = useDashboard();
 
   const contentRef = useRef<HTMLDivElement>(null);
@@ -34,29 +33,35 @@ export const App: React.FC = () => {
     }
   }, []);
 
+  // 캡처 버튼: Sheets 저장 → 화면 캡처 순서
   const handleCapture = useCallback(async () => {
+    showToast('Google Sheets에 저장 중…', 'loading');
+    try {
+      await saveToSheets(state, totalStaff, processingRate);
+      showToast('✓ 저장 완료, 캡처 중…', 'success', 1500);
+    } catch {
+      showToast('Sheets 저장 실패 — 캡처만 진행합니다', 'error', 2000);
+    }
+
+    // 잠시 후 캡처
+    await new Promise(r => setTimeout(r, 600));
+
     const el = contentRef.current;
     if (!el) return;
     const prev = el.style.background;
     el.style.background = '#ffffff';
     const canvas = await html2canvas(el, {
-      scale: 3, backgroundColor: '#ffffff', useCORS: true, logging: false, removeContainer: true,
+      scale: 3, backgroundColor: '#ffffff',
+      useCORS: true, logging: false, removeContainer: true,
     });
     el.style.background = prev;
+
     const link = document.createElement('a');
     link.download = `세탁인계_${state.date}.png`;
     link.href = canvas.toDataURL('image/png');
     link.click();
-  }, [state.date]);
 
-  const handleSaveSheets = useCallback(async () => {
-    showToast('Google Sheets에 저장 중…', 'loading');
-    try {
-      await saveToSheets(state, totalStaff, processingRate);
-      showToast('✓ Google Sheets 저장 완료', 'success');
-    } catch (e) {
-      showToast(`저장 실패: ${e instanceof Error ? e.message : '알 수 없는 오류'}`, 'error', 5000);
-    }
+    showToast('✓ 캡처 완료', 'success');
   }, [state, totalStaff, processingRate, showToast]);
 
   const toastBg: Record<ToastType, string> = {
@@ -65,7 +70,7 @@ export const App: React.FC = () => {
 
   return (
     <div style={{ maxWidth: 1360, margin: '0 auto', fontFamily: "'Malgun Gothic', 'Segoe UI', Arial, sans-serif" }}>
-      {/* 토스트 알림 */}
+      {/* 토스트 */}
       {toast && (
         <div style={{
           position: 'fixed', bottom: 28, left: '50%', transform: 'translateX(-50%)',
@@ -74,35 +79,31 @@ export const App: React.FC = () => {
           fontSize: 14, fontWeight: 700, zIndex: 9999,
           boxShadow: '0 4px 20px rgba(0,0,0,0.25)',
           display: 'flex', alignItems: 'center', gap: 8,
-          animation: 'fadeInUp 0.2s ease',
           whiteSpace: 'nowrap',
         }}>
           {toast.type === 'loading' && (
-            <span style={{ display: 'inline-block', width: 14, height: 14, border: '2px solid rgba(255,255,255,0.4)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+            <span style={{
+              display: 'inline-block', width: 14, height: 14,
+              border: '2px solid rgba(255,255,255,0.4)', borderTopColor: '#fff',
+              borderRadius: '50%', animation: 'spin 0.7s linear infinite',
+            }} />
           )}
           {toast.msg}
         </div>
       )}
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
 
-      <style>{`
-        @keyframes fadeInUp { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
-        @keyframes spin { to { transform: rotate(360deg); } }
-      `}</style>
-
+      {/* 1. 헤더 */}
       <ShiftHeader
         date={state.date}
         savedAt={state.savedAt}
-        totalStaff={totalStaff}
         onDateChange={d => set('date', d)}
         onReset={handleReset}
         onCapture={handleCapture}
-        onSave={saveRecord}
-        onSaveSheets={handleSaveSheets}
       />
-      <div
-        ref={contentRef}
-        style={{ background: '#dde3ec', padding: '4px 0 6px', borderRadius: 8 }}
-      >
+
+      <div ref={contentRef} style={{ background: '#dde3ec', padding: '4px 0 6px', borderRadius: 8 }}>
+        {/* 2. 인원 현황 */}
         <StaffPanel
           staff={state.staff}
           totalStaff={totalStaff}
@@ -112,28 +113,37 @@ export const App: React.FC = () => {
           onTargetChange={v => set('targetCount', v)}
           onWorkHoursChange={v => set('workHours', v)}
         />
-        <WorkOrderTable
-          workOrders={state.workOrders}
-          totalCount={totalCount}
-          onCountChange={(id, count) => updateWorkOrder(id, 'count', count)}
-          onStageChange={(id: string, field: StageField, stage: ProcessStage) =>
-            updateWorkOrder(id, field, stage)
-          }
-          onColorChange={(id: string, color: OrderColor) => updateWorkOrderColor(id, color)}
+
+        {/* 3. 작업 현황 */}
+        <WorkOrderSection
+          workSequence={state.workSequence}
+          processStatus={state.processStatus}
+          intensiveCareColors={state.intensiveCareColors}
+          onSequenceChange={updateWorkSequence}
+          onProcessStatusChange={(key: ProcessKey, status: ProcessStatus) => updateProcessStatus(key, status)}
+          onIntensiveCareChange={updateIntensiveCareColors}
         />
+
+        {/* 4. 처리 통계 */}
         <StatsPanel
+          totalCount={totalCount}
           avgItemsPerUnit={state.avgItemsPerUnit}
           washMethodCount={state.washMethodCount}
-          totalCount={totalCount}
           expectedTotal={expectedTotal}
           processingRate={processingRate}
-          workOrders={state.workOrders}
+          processStatus={state.processStatus}
+          onTotalCountChange={v => set('totalCount', v)}
           onAvgChange={v => set('avgItemsPerUnit', v)}
           onWashCountChange={v => set('washMethodCount', v)}
         />
-        <KickerPanel kickers={state.kickers} onUpdate={updateKicker} />
+
+        {/* 5. 인수인계 메모 */}
         <HandoverNotes notes={state.notes} onUpdate={updateNote} />
+
+        {/* 6. 키커 현황 */}
+        <KickerPanel kickers={state.kickers} onUpdate={updateKicker} />
       </div>
+
       <div style={{ height: 20 }} />
     </div>
   );

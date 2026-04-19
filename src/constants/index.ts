@@ -1,63 +1,54 @@
-import { OrderColor, ProcessStage, WorkOrder, DashboardState, HandoverSection, KickerSlot } from '../types';
+import { OrderColor, ProcessStatusMap, DashboardState, HandoverSection, KickerSlot } from '../types';
 
-export interface ColorInfo { bg: string; text: string; light: string; label: string; }
+export interface ColorInfo { bg: string; text: string; label: string; }
 
 export const ORDER_COLOR_MAP: Record<OrderColor, ColorInfo> = {
-  파랑: { bg: '#2563eb', text: '#fff', light: '#eff6ff', label: '파랑' },
-  주황: { bg: '#ea580c', text: '#fff', light: '#fff7ed', label: '주황' },
-  골드: { bg: '#b45309', text: '#fff', light: '#fffbeb', label: '골드' },
-  분홍: { bg: '#db2777', text: '#fff', light: '#fdf2f8', label: '분홍' },
-  검정: { bg: '#374151', text: '#fff', light: '#f9fafb', label: '검정' },
-  노랑: { bg: '#ca8a04', text: '#fff', light: '#fefce8', label: '노랑' },
-  민트: { bg: '#059669', text: '#fff', light: '#f0fdf4', label: '민트' },
-  보라: { bg: '#7c3aed', text: '#fff', light: '#f5f3ff', label: '보라' },
-  초록: { bg: '#16a34a', text: '#fff', light: '#f0fdf4', label: '초록' },
+  파랑: { bg: '#2563eb', text: '#fff', label: '파랑' },
+  주황: { bg: '#ea580c', text: '#fff', label: '주황' },
+  골드: { bg: '#b45309', text: '#fff', label: '골드' },
+  분홍: { bg: '#db2777', text: '#fff', label: '분홍' },
+  검정: { bg: '#374151', text: '#fff', label: '검정' },
+  노랑: { bg: '#ca8a04', text: '#fff', label: '노랑' },
+  민트: { bg: '#059669', text: '#fff', label: '민트' },
+  보라: { bg: '#7c3aed', text: '#fff', label: '보라' },
+  초록: { bg: '#16a34a', text: '#fff', label: '초록' },
 };
-
-export interface StageInfo { bg: string; text: string; border: string; label: string; weight: number; }
-
-export const STAGE_MAP: Record<ProcessStage, StageInfo> = {
-  '':   { bg: '#f8fafc', text: '#94a3b8', border: '#e2e8f0', label: '—',    weight: 0   },
-  초반: { bg: '#dbeafe', text: '#1d4ed8', border: '#93c5fd', label: '초반', weight: 25  },
-  중반: { bg: '#fef9c3', text: '#854d0e', border: '#fde047', label: '중반', weight: 50  },
-  후반: { bg: '#ffedd5', text: '#c2410c', border: '#fdba74', label: '후반', weight: 75  },
-  완료: { bg: '#dcfce7', text: '#15803d', border: '#86efac', label: '완료', weight: 100 },
-};
-
-export const STAGE_ORDER: ProcessStage[] = ['', '초반', '중반', '후반', '완료'];
 
 export const ORDER_COLORS: OrderColor[] = [
   '파랑', '주황', '골드', '분홍', '검정', '노랑', '민트', '보라', '초록',
 ];
 
-export const DEFAULT_WORK_ORDERS: WorkOrder[] = ORDER_COLORS.map((color, i) => ({
-  id: String(i + 1),
-  color,
-  count: 0,
-  classification: '' as ProcessStage,
-  dryCleaning:    '' as ProcessStage,
-  intensiveCare:  '' as ProcessStage,
-  wet:            '' as ProcessStage,
-  shirts:         '' as ProcessStage,
-}));
+export const PROCESS_LABELS: Record<string, { label: string; short: string }> = {
+  classification: { label: '대분류',      short: '대분류' },
+  dryCleaning:    { label: '드라이클리닝', short: '드라이' },
+  wet:            { label: '웨트세탁',    short: '웨트'   },
+  shirts:         { label: '셔츠세탁',    short: '셔츠'   },
+};
+
+export const PROCESS_KEYS = ['classification', 'dryCleaning', 'wet', 'shirts'] as const;
+
+const DEFAULT_PROCESS_STATUS: ProcessStatusMap = {
+  classification: { color: '', progress: 0 },
+  dryCleaning:    { color: '', progress: 0 },
+  wet:            { color: '', progress: 0 },
+  shirts:         { color: '', progress: 0 },
+};
 
 export const DEFAULT_NOTES: HandoverSection = {
-  incomplete: '',
-  issues: '',
-  dayTeamRequest: '',
-  other: '',
+  incomplete: '', issues: '', dayTeamRequest: '', other: '',
 };
 
 export const DEFAULT_KICKERS: KickerSlot[] = [1, 2, 3, 4].map(i => ({
-  id: String(i),
-  on: false,
-  slots: 0,
+  id: String(i), on: false, slots: 0,
 }));
 
 export const DEFAULT_STATE: DashboardState = {
   date: new Date().toISOString().slice(0, 10),
   staff: { classification: 0, machine: 0, qc: 0, wet: 0, dryShirts: 0, support: 0 },
-  workOrders: DEFAULT_WORK_ORDERS,
+  workSequence: [],
+  processStatus: DEFAULT_PROCESS_STATUS,
+  intensiveCareColors: [],
+  totalCount: 0,
   avgItemsPerUnit: 0,
   washMethodCount: 0,
   targetCount: 0,
@@ -74,14 +65,4 @@ export const STAFF_POSITIONS: Array<{ key: keyof DashboardState['staff']; label:
   { key: 'wet',            label: '웨트'        },
   { key: 'dryShirts',      label: '건조&셔츠'   },
   { key: 'support',        label: '지원 및 기타' },
-];
-
-export type StageField = 'classification' | 'dryCleaning' | 'intensiveCare' | 'wet' | 'shirts';
-
-// 카드 레이아웃에서 보여줄 주요 컬럼 (intensiveCare는 dryCleaning 배지로 처리)
-export const STAGE_COLUMNS: Array<{ key: StageField; label: string; desc: string }> = [
-  { key: 'classification', label: '대분류',      desc: '세탁물 기본 분류' },
-  { key: 'dryCleaning',    label: '드라이클리닝', desc: '드라이케어 진행'  },
-  { key: 'wet',            label: '웨트',         desc: '웨트세탁 진행'   },
-  { key: 'shirts',         label: '셔츠',         desc: '셔츠세탁 진행'   },
 ];

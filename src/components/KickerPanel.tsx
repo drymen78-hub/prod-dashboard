@@ -25,52 +25,63 @@ export function KickerPanel({ kickers, onUpdate }: Props) {
             가동 {activeCount}대
           </span>
           {totalSlots > 0 && (
-            <span style={{
-              background: '#f0fdf4', color: '#15803d',
-              borderRadius: 20, padding: '2px 10px', fontSize: 11, fontWeight: 700,
-            }}>
+            <span style={{ background: '#f0fdf4', color: '#15803d', borderRadius: 20, padding: '2px 10px', fontSize: 11, fontWeight: 700 }}>
               총 {totalSlots} 슬롯
             </span>
           )}
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, padding: '12px 16px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, padding: '12px 16px 14px' }}>
         {kickers.map((kicker, idx) => {
-          const color  = KICKER_COLORS[idx] ?? '#64748b';
-          const isOn   = kicker.on;
+          const color = KICKER_COLORS[idx] ?? '#64748b';
+          const isOn  = kicker.on;
 
           return (
             <div key={kicker.id} style={{
               background: isOn ? color + '0f' : '#f8fafc',
               border: `2px solid ${isOn ? color + '55' : '#e2e8f0'}`,
-              borderRadius: 12, padding: '14px 12px',
-              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
+              borderRadius: 12, padding: '12px 14px',
+              display: 'flex', alignItems: 'center', gap: 12,
               transition: 'border-color 0.2s, background 0.2s',
             }}>
               {/* 키커 번호 */}
-              <div style={{ fontSize: 13, fontWeight: 900, color: isOn ? color : '#94a3b8', letterSpacing: 0.5 }}>
+              <div style={{ fontSize: 14, fontWeight: 900, color: isOn ? color : '#94a3b8', flexShrink: 0, minWidth: 42 }}>
                 키커 {idx + 1}
               </div>
 
-              {/* ON / OFF 토글 */}
-              <button
-                onClick={() => onUpdate(kicker.id, 'on', !isOn)}
-                style={{
-                  width: 72, height: 32, borderRadius: 8,
-                  border: `2px solid ${isOn ? color : '#e2e8f0'}`,
-                  background: isOn ? color : '#fff',
-                  color: isOn ? '#fff' : '#94a3b8',
-                  fontSize: 13, fontWeight: 900, cursor: 'pointer',
-                  transition: 'background 0.2s, color 0.2s',
-                }}
-              >
-                {isOn ? 'ON' : 'OFF'}
-              </button>
+              {/* ON/OFF 라디오 스타일 */}
+              <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                <button
+                  onClick={() => onUpdate(kicker.id, 'on', true)}
+                  style={{
+                    background: isOn ? color : '#fff',
+                    color: isOn ? '#fff' : '#94a3b8',
+                    border: `2px solid ${isOn ? color : '#e2e8f0'}`,
+                    borderRadius: 6, padding: '4px 10px',
+                    fontSize: 12, fontWeight: 900, cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', gap: 4,
+                  }}
+                >
+                  <span style={{ fontSize: 10 }}>{isOn ? '●' : '○'}</span> ON
+                </button>
+                <button
+                  onClick={() => onUpdate(kicker.id, 'on', false)}
+                  style={{
+                    background: !isOn ? '#64748b' : '#fff',
+                    color: !isOn ? '#fff' : '#94a3b8',
+                    border: `2px solid ${!isOn ? '#64748b' : '#e2e8f0'}`,
+                    borderRadius: 6, padding: '4px 10px',
+                    fontSize: 12, fontWeight: 900, cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', gap: 4,
+                  }}
+                >
+                  <span style={{ fontSize: 10 }}>{!isOn ? '●' : '○'}</span> OFF
+                </button>
+              </div>
 
-              {/* 슬롯 수 */}
-              <div style={{ width: '100%' }}>
-                <div style={{ fontSize: 9, color: '#94a3b8', fontWeight: 600, textAlign: 'center', marginBottom: 3 }}>슬롯</div>
+              {/* 슬롯 입력 */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4, flex: 1 }}>
                 <input
                   type="number" min={0}
                   value={kicker.slots || ''}
@@ -78,21 +89,16 @@ export function KickerPanel({ kickers, onUpdate }: Props) {
                   disabled={!isOn}
                   onChange={e => onUpdate(kicker.id, 'slots', Number(e.target.value))}
                   style={{
-                    width: '100%', height: 34,
+                    width: 52, height: 32,
                     border: `1.5px solid ${isOn ? color + '66' : '#e2e8f0'}`,
                     borderRadius: 6, textAlign: 'center',
-                    fontSize: 16, fontWeight: 900, color: '#1e293b',
+                    fontSize: 15, fontWeight: 900, color: '#1e293b',
                     background: isOn ? '#fff' : '#f1f5f9',
-                    outline: 'none', cursor: isOn ? 'text' : 'not-allowed',
-                    opacity: isOn ? 1 : 0.5,
+                    outline: 'none', opacity: isOn ? 1 : 0.5,
+                    cursor: isOn ? 'text' : 'not-allowed',
                   }}
                 />
-              </div>
-
-              {/* 슬롯 표시 */}
-              <div style={{ fontSize: 20, fontWeight: 900, color: isOn ? color : '#d1d5db', lineHeight: 1 }}>
-                {isOn ? (kicker.slots || 0) : '—'}
-                {isOn && <span style={{ fontSize: 11, fontWeight: 700, marginLeft: 2, color: color + 'aa' }}>슬롯</span>}
+                <span style={{ fontSize: 11, fontWeight: 700, color: '#64748b' }}>슬롯</span>
               </div>
             </div>
           );

@@ -1,9 +1,9 @@
 import { useState, useCallback } from 'react';
-import { DashboardState, ProcessStage, OrderColor, HandoverSection, KickerSlot } from '../types';
-import { DEFAULT_STATE, DEFAULT_NOTES, DEFAULT_KICKERS, StageField } from '../constants';
+import { DashboardState, ProcessKey, ProcessStatus, ProcessStatusMap, OrderColor, HandoverSection, KickerSlot } from '../types';
+import { DEFAULT_STATE, DEFAULT_NOTES, DEFAULT_KICKERS } from '../constants';
 
-const STORAGE_KEY = 'shift-handover-v2';
-const HISTORY_KEY = 'shift-history-v1';
+const STORAGE_KEY = 'shift-handover-v3';
+const HISTORY_KEY  = 'shift-history-v2';
 
 function load(): DashboardState {
   try {
@@ -11,10 +11,9 @@ function load(): DashboardState {
     if (!raw) return structuredClone(DEFAULT_STATE);
     const parsed = JSON.parse(raw) as Partial<DashboardState>;
 
-    // notes 마이그레이션: 이전 버전에서 string이었던 경우 처리
     let notes: HandoverSection;
-    if (typeof (parsed as any).notes === 'string') {
-      notes = { ...DEFAULT_NOTES, other: (parsed as any).notes as string };
+    if (typeof (parsed as Record<string, unknown>).notes === 'string') {
+      notes = { ...DEFAULT_NOTES, other: (parsed as Record<string, unknown>).notes as string };
     } else {
       notes = { ...DEFAULT_NOTES, ...(parsed.notes ?? {}) };
     }
@@ -23,8 +22,11 @@ function load(): DashboardState {
       ...structuredClone(DEFAULT_STATE),
       ...parsed,
       staff: { ...DEFAULT_STATE.staff, ...(parsed.staff ?? {}) },
+      processStatus: { ...DEFAULT_STATE.processStatus, ...(parsed.processStatus ?? {}) } as ProcessStatusMap,
       notes,
       kickers: (parsed.kickers ?? structuredClone(DEFAULT_KICKERS)) as KickerSlot[],
+      workSequence: (parsed.workSequence ?? []) as OrderColor[],
+      intensiveCareColors: (parsed.intensiveCareColors ?? []) as OrderColor[],
     };
   } catch {
     return structuredClone(DEFAULT_STATE);
@@ -44,33 +46,25 @@ export function useDashboard() {
 
   const updateStaff = useCallback((key: keyof DashboardState['staff'], val: number) => {
     setState(s => {
-      // 0.5 단위 허용, 음수 방지
       const clamped = Math.max(0, Math.round(val * 2) / 2);
       const next = { ...s, staff: { ...s.staff, [key]: clamped } };
       persist(next); return next;
     });
   }, []);
 
-  const updateWorkOrder = useCallback(
-    (id: string, field: 'count' | StageField, val: number | ProcessStage) => {
-      setState(s => {
-        const next = {
-          ...s,
-          workOrders: s.workOrders.map(wo => wo.id === id ? { ...wo, [field]: val } : wo),
-        };
-        persist(next); return next;
-      });
-    }, []
-  );
+  const updateWorkSequence = useCallback((colors: OrderColor[]) => {
+    setState(s => { const next = { ...s, workSequence: colors }; persist(next); return next; });
+  }, []);
 
-  const updateWorkOrderColor = useCallback((id: string, color: OrderColor) => {
+  const updateProcessStatus = useCallback((key: ProcessKey, status: ProcessStatus) => {
     setState(s => {
-      const next = {
-        ...s,
-        workOrders: s.workOrders.map(wo => wo.id === id ? { ...wo, color } : wo),
-      };
+      const next = { ...s, processStatus: { ...s.processStatus, [key]: status } };
       persist(next); return next;
     });
+  }, []);
+
+  const updateIntensiveCareColors = useCallback((colors: OrderColor[]) => {
+    setState(s => { const next = { ...s, intensiveCareColors: colors }; persist(next); return next; });
   }, []);
 
   const updateNote = useCallback((field: keyof HandoverSection, val: string) => {
@@ -82,10 +76,7 @@ export function useDashboard() {
 
   const updateKicker = useCallback((id: string, field: 'on' | 'slots', val: boolean | number) => {
     setState(s => {
-      const next = {
-        ...s,
-        kickers: s.kickers.map(k => k.id === id ? { ...k, [field]: val } : k),
-      };
+      const next = { ...s, kickers: s.kickers.map(k => k.id === id ? { ...k, [field]: val } : k) };
       persist(next); return next;
     });
   }, []);
@@ -97,14 +88,12 @@ export function useDashboard() {
     });
   }, []);
 
-  const totalStaff = Object.values(state.staff).reduce((a, b) => a + (b || 0), 0);
-  const totalCount = state.workOrders.reduce((a, wo) => a + (wo.count || 0), 0);
-  const expectedTotal =
-    totalCount > 0 && state.avgItemsPerUnit > 0
-      ? Math.round(totalCount * state.avgItemsPerUnit) : 0;
-  const processingRate =
-    expectedTotal > 0 && state.washMethodCount > 0
-      ? +((state.washMethodCount / expectedTotal) * 100).toFixed(1) : 0;
+  const totalStaff     = Object.values(state.staff).reduce((a, b) => a + (b || 0), 0);
+  const totalCount     = state.totalCount;
+  const expectedTotal  = totalCount > 0 && state.avgItemsPerUnit > 0
+    ? Math.round(totalCount * state.avgItemsPerUnit) : 0;
+  const processingRate = expectedTotal > 0 && state.washMethodCount > 0
+    ? +((state.washMethodCount / expectedTotal) * 100).toFixed(1) : 0;
 
   const saveRecord = useCallback(() => {
     const now = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
@@ -117,13 +106,19 @@ export function useDashboard() {
       state.notes.other          ? `기타: ${state.notes.other}` : '',
     ].filter(Boolean).join(' | ');
 
+    const ps = state.processStatus;
     const record = {
-      date: state.date, totalStaff,
-      classification: state.staff.classification, machine: state.staff.machine,
-      qc: state.staff.qc, wet: state.staff.wet, dryShirts: state.staff.dryShirts,
-      support: state.staff.support, totalCount,
-      avgItemsPerUnit: state.avgItemsPerUnit, expectedTotal,
+      date: state.date, totalStaff, workHours: state.workHours,
+      totalCount, targetCount: state.targetCount,
       washMethodCount: state.washMethodCount, processingRate,
+      workSequence: state.workSequence.join(', '),
+      classificationColor: ps.classification.color, classificationProgress: ps.classification.progress,
+      dryColor: ps.dryCleaning.color, dryProgress: ps.dryCleaning.progress,
+      wetColor: ps.wet.color, wetProgress: ps.wet.progress,
+      shirtColor: ps.shirts.color, shirtProgress: ps.shirts.progress,
+      intensiveCareColors: state.intensiveCareColors.join(', '),
+      kickerActive: state.kickers.filter(k => k.on).length,
+      kickerSlots: state.kickers.filter(k => k.on).reduce((s, k) => s + (k.slots || 0), 0),
       notes: notesText, savedAt: now,
     };
 
@@ -132,29 +127,32 @@ export function useDashboard() {
     if (idx >= 0) history[idx] = record; else history.push(record);
     localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
 
-    const headers = ['날짜', '총인원', '분류', '기계', 'QC', '웨트', '건조&셔츠', '지원',
-      '총건수', '건당평균', '예상개별수', '세탁건수', '처리율(%)', '메모', '저장시간'];
+    const headers = ['날짜', '총인원', '근무시간', '총건수', '목표건수', '세탁건수', '처리율(%)',
+      '작업순서', '대분류색', '대분류%', '드라이색', '드라이%',
+      '웨트색', '웨트%', '셔츠색', '셔츠%', '집중케어색상',
+      '가동키커', '키커슬롯', '메모', '저장시간'];
     const rows = history.map(r => [
-      r.date, r.totalStaff, r.classification, r.machine, r.qc,
-      r.wet, r.dryShirts, r.support, r.totalCount,
-      r.avgItemsPerUnit, r.expectedTotal, r.washMethodCount,
-      r.processingRate, r.notes, r.savedAt,
+      r.date, r.totalStaff, r.workHours, r.totalCount, r.targetCount,
+      r.washMethodCount, r.processingRate,
+      r.workSequence, r.classificationColor, r.classificationProgress,
+      r.dryColor, r.dryProgress, r.wetColor, r.wetProgress,
+      r.shirtColor, r.shirtProgress, r.intensiveCareColors,
+      r.kickerActive, r.kickerSlots, r.notes, r.savedAt,
     ]);
     const csv = [headers, ...rows]
       .map(row => row.map(cell => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(','))
       .join('\n');
     const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `세탁인계기록_${new Date().toISOString().slice(0, 10)}.csv`;
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = `세탁인계기록_${new Date().toISOString().slice(0, 10)}.csv`;
     document.body.appendChild(a); a.click();
     document.body.removeChild(a); URL.revokeObjectURL(url);
   }, [state, set, totalStaff, totalCount, expectedTotal, processingRate]);
 
   return {
     state, set,
-    updateStaff, updateWorkOrder, updateWorkOrderColor,
+    updateStaff, updateWorkSequence, updateProcessStatus, updateIntensiveCareColors,
     updateNote, updateKicker,
     handleReset, saveRecord,
     totalStaff, totalCount, expectedTotal, processingRate,
