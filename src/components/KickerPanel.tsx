@@ -2,91 +2,102 @@ import { KickerSlot } from '../types';
 
 interface Props {
   kickers: KickerSlot[];
+  editMode: boolean;
   onUpdate: (id: string, field: 'on' | 'slots', val: boolean | number) => void;
 }
 
-export function KickerPanel({ kickers, onUpdate }: Props) {
-  // 단일 통합 뷰: kickers[0]을 전체 키커 대표 상태로 사용
+export function KickerPanel({ kickers, editMode, onUpdate }: Props) {
   const kicker = kickers[0] ?? { id: '1', on: false, slots: 0 };
   const isOn = kicker.on;
 
   return (
-    <div className="card" style={{ marginBottom: 12 }}>
-      <div className="section-header">
-        <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#0891b2' }} />
-        <h2>🔧 키커 현황</h2>
-        {isOn && kicker.slots > 0 && (
-          <span style={{
-            marginLeft: 'auto', background: '#f0fdf4', color: '#15803d',
-            borderRadius: 20, padding: '2px 14px', fontSize: 14, fontWeight: 800,
-          }}>
-            {kicker.slots} 슬롯 가동 중
-          </span>
-        )}
+    <div className="card" style={{ marginBottom: 10 }}>
+      <div className="card-header">
+        <h2>⚙️ 키커 현황</h2>
+        <span style={{
+          marginLeft: 'auto',
+          background: isOn ? '#dcfce7' : '#f1f5f9',
+          color: isOn ? '#16a34a' : '#94a3b8',
+          borderRadius: 20, padding: '2px 10px',
+          fontSize: 12, fontWeight: 700,
+        }}>
+          {isOn ? `가동 중 · ${kicker.slots || 0}슬롯` : '미가동'}
+        </span>
       </div>
 
-      <div style={{ padding: '16px 20px 18px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div style={{ padding: '10px 14px 12px' }}>
+        {editMode ? (
+          /* 편집 모드: 버튼 + 슬롯 입력 */
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <button
+              onClick={() => onUpdate(kicker.id, 'on', true)}
+              style={{
+                background: isOn ? '#15803d' : '#fff',
+                color: isOn ? '#fff' : '#94a3b8',
+                border: `2px solid ${isOn ? '#15803d' : '#e2e8f0'}`,
+                borderRadius: 8, padding: '7px 20px',
+                fontSize: 14, fontWeight: 800, cursor: 'pointer',
+              }}
+            >
+              {isOn ? '● 가동' : '○ 가동'}
+            </button>
 
-        {/* 가동 / 미가동 */}
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          <button
-            onClick={() => onUpdate(kicker.id, 'on', true)}
-            style={{
-              background: isOn ? '#15803d' : '#fff',
-              color: isOn ? '#fff' : '#94a3b8',
-              border: `2px solid ${isOn ? '#15803d' : '#e2e8f0'}`,
-              borderRadius: 10, padding: '10px 28px',
-              fontSize: 17, fontWeight: 900, cursor: 'pointer',
-              display: 'flex', alignItems: 'center', gap: 6,
-            }}
-          >
-            <span style={{ fontSize: 12 }}>{isOn ? '●' : '○'}</span> 가동
-          </button>
+            <button
+              onClick={() => onUpdate(kicker.id, 'on', false)}
+              style={{
+                background: !isOn ? '#64748b' : '#fff',
+                color: !isOn ? '#fff' : '#94a3b8',
+                border: `2px solid ${!isOn ? '#64748b' : '#e2e8f0'}`,
+                borderRadius: 8, padding: '7px 20px',
+                fontSize: 14, fontWeight: 800, cursor: 'pointer',
+              }}
+            >
+              {!isOn ? '● 미가동' : '○ 미가동'}
+            </button>
 
-          <button
-            onClick={() => onUpdate(kicker.id, 'on', false)}
-            style={{
-              background: !isOn ? '#64748b' : '#fff',
-              color: !isOn ? '#fff' : '#94a3b8',
-              border: `2px solid ${!isOn ? '#64748b' : '#e2e8f0'}`,
-              borderRadius: 10, padding: '10px 28px',
-              fontSize: 17, fontWeight: 900, cursor: 'pointer',
-              display: 'flex', alignItems: 'center', gap: 6,
-            }}
-          >
-            <span style={{ fontSize: 12 }}>{!isOn ? '●' : '○'}</span> 미가동
-          </button>
-        </div>
-
-        {/* 할당 슬롯수 */}
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 14,
-          background: isOn ? '#f0fdf4' : '#f8fafc',
-          border: `1.5px solid ${isOn ? '#86efac' : '#e2e8f0'}`,
-          borderRadius: 10, padding: '12px 16px',
-          opacity: isOn ? 1 : 0.5,
-        }}>
-          <span style={{ fontSize: 16, fontWeight: 800, color: isOn ? '#15803d' : '#94a3b8' }}>
-            할당 슬롯
-          </span>
-          <input
-            type="number" min={0}
-            value={kicker.slots || ''}
-            placeholder="0"
-            disabled={!isOn}
-            onChange={e => onUpdate(kicker.id, 'slots', Number(e.target.value))}
-            style={{
-              width: 80, height: 40,
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginLeft: 8, opacity: isOn ? 1 : 0.4 }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b' }}>할당 슬롯</span>
+              <input
+                type="number" min={0}
+                value={kicker.slots || ''} placeholder="0"
+                disabled={!isOn}
+                onChange={e => onUpdate(kicker.id, 'slots', Number(e.target.value))}
+                style={{
+                  width: 64, height: 34, border: `1.5px solid ${isOn ? '#86efac' : '#e2e8f0'}`,
+                  borderRadius: 7, textAlign: 'center',
+                  fontSize: 18, fontWeight: 900, color: '#1e293b',
+                  background: '#fff', outline: 'none',
+                  cursor: isOn ? 'text' : 'not-allowed',
+                }}
+              />
+              <span style={{ fontSize: 13, fontWeight: 700, color: '#64748b' }}>개</span>
+            </div>
+          </div>
+        ) : (
+          /* 읽기 모드: 텍스트 표시 */
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              background: isOn ? '#f0fdf4' : '#f8fafc',
               border: `1.5px solid ${isOn ? '#86efac' : '#e2e8f0'}`,
-              borderRadius: 8, textAlign: 'center',
-              fontSize: 22, fontWeight: 900, color: '#1e293b',
-              background: '#fff', outline: 'none',
-              cursor: isOn ? 'text' : 'not-allowed',
-            }}
-          />
-          <span style={{ fontSize: 17, fontWeight: 800, color: isOn ? '#15803d' : '#94a3b8' }}>개</span>
-        </div>
-
+              borderRadius: 8, padding: '8px 14px',
+              flex: 1,
+            }}>
+              <span style={{ fontSize: 13, fontWeight: 700, color: isOn ? '#15803d' : '#94a3b8' }}>
+                {isOn ? '● 가동 중' : '○ 미가동'}
+              </span>
+              {isOn && (
+                <>
+                  <span style={{ width: 1, height: 14, background: '#d1d5db', display: 'inline-block' }} />
+                  <span style={{ fontSize: 20, fontWeight: 800, color: '#15803d', fontVariantNumeric: 'tabular-nums' }}>
+                    {kicker.slots || 0}
+                    <span style={{ fontSize: 13, fontWeight: 700, color: '#64748b', marginLeft: 3 }}>슬롯</span>
+                  </span>
+                </>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

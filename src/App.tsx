@@ -2,6 +2,8 @@ import React, { useRef, useCallback, useState } from 'react';
 import html2canvas from 'html2canvas';
 import { useDashboard } from './hooks/useDashboard';
 import { ShiftHeader } from './components/ShiftHeader';
+import { DashboardBanner } from './components/DashboardBanner';
+import { KpiRibbon } from './components/KpiRibbon';
 import { StaffPanel } from './components/StaffPanel';
 import { WorkOrderSection } from './components/WorkOrderSection';
 import { StatsPanel } from './components/StatsPanel';
@@ -14,19 +16,6 @@ import { ProcessKey, ProcessStatus } from './types';
 type ToastType = 'success' | 'error' | 'loading';
 interface Toast { msg: string; type: ToastType }
 
-function SectionLabel({ emoji, title, color }: { emoji: string; title: string; color: string }) {
-  return (
-    <div style={{
-      display: 'flex', alignItems: 'center', gap: 8,
-      padding: '8px 16px', marginBottom: 4,
-      background: color, borderRadius: 8,
-    }}>
-      <span style={{ fontSize: 16 }}>{emoji}</span>
-      <span style={{ fontSize: 14, fontWeight: 900, color: '#fff', letterSpacing: 0.5 }}>{title}</span>
-    </div>
-  );
-}
-
 export const App: React.FC = () => {
   const {
     state, set, updateStaff,
@@ -38,6 +27,7 @@ export const App: React.FC = () => {
 
   const contentRef = useRef<HTMLDivElement>(null);
   const [toast, setToast] = useState<Toast | null>(null);
+  const [editMode, setEditMode] = useState(false);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const showToast = useCallback((msg: string, type: ToastType, duration = 3000) => {
@@ -77,7 +67,9 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div style={{ maxWidth: 1360, margin: '0 auto', fontFamily: "'Malgun Gothic', 'Segoe UI', Arial, sans-serif" }}>
+    <div style={{ maxWidth: 1280, margin: '0 auto', fontFamily: "'Pretendard', -apple-system, 'Malgun Gothic', sans-serif" }}>
+
+      {/* Toast */}
       {toast && (
         <div style={{
           position: 'fixed', bottom: 28, left: '50%', transform: 'translateX(-50%)',
@@ -97,52 +89,91 @@ export const App: React.FC = () => {
           {toast.msg}
         </div>
       )}
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
 
-      {/* 1. 헤더 */}
+      {/* 컨트롤 바 (캡처 제외) */}
       <ShiftHeader
-        date={state.date} savedAt={state.savedAt}
+        date={state.date}
+        editMode={editMode}
         onDateChange={d => set('date', d)}
-        onReset={handleReset} onCapture={handleCapture}
+        onReset={handleReset}
+        onCapture={handleCapture}
+        onEditToggle={() => setEditMode(m => !m)}
       />
 
-      <div ref={contentRef} style={{ background: '#dde3ec', padding: '8px 8px 10px', borderRadius: 8 }}>
+      {/* 캡처 영역 */}
+      <div
+        ref={contentRef}
+        style={{ background: '#f0f2f5', padding: '14px 14px 16px', borderRadius: 10 }}
+      >
+        {/* 비주얼 헤더 */}
+        <DashboardBanner date={state.date} savedAt={state.savedAt} />
 
-        {/* 2. 개별클리닝파트 */}
-        <SectionLabel emoji="🧪" title="개별클리닝파트" color="#1e3a5f" />
-        <StaffPanel
-          staff={state.staff} totalStaff={totalStaff}
-          onUpdate={updateStaff}
-        />
-        <WorkOrderSection
-          workSequence={state.workSequence}
-          workSequenceCounts={state.workSequenceCounts}
-          processStatus={state.processStatus}
-          intensiveCareColors={state.intensiveCareColors}
-          onSequenceChange={updateWorkSequence}
-          onSequenceCountChange={updateWorkSequenceCount}
-          onProcessStatusChange={(key: ProcessKey, status: ProcessStatus) => updateProcessStatus(key, status)}
-          onIntensiveCareChange={updateIntensiveCareColors}
-        />
-        <StatsPanel
-          totalCount={totalCount}
-          avgItemsPerUnit={state.avgItemsPerUnit}
+        {/* KPI 리본 */}
+        <KpiRibbon
+          processingRate={processingRate}
           washMethodCount={state.washMethodCount}
           expectedTotal={expectedTotal}
-          processingRate={processingRate}
-          processStatus={state.processStatus}
-          onAvgChange={v => set('avgItemsPerUnit', v)}
-          onWashCountChange={v => set('washMethodCount', v)}
+          totalCount={totalCount}
+          targetCount={state.targetCount}
+          totalStaff={totalStaff}
+          staffCounts={state.staff}
+          kickers={state.kickers}
         />
-        <KickerPanel kickers={state.kickers} onUpdate={updateKicker} />
 
-        {/* 3. 런드리파트 */}
-        <SectionLabel emoji="🧺" title="런드리파트" color="#0e7490" />
-        <LaundrySectionPanel laundry={state.laundry} onUpdate={updateLaundry} />
+        {/* 2컬럼 메인 그리드 */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: 12 }}>
 
-        {/* 4. 인수인계 메모 (공통) */}
-        <SectionLabel emoji="💬" title="인수인계 메모 (공통)" color="#6d28d9" />
-        <HandoverNotes notes={state.notes} onUpdate={updateNote} />
+          {/* ── 좌: 공정별 진행률 + 품질 체크 ── */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+            <WorkOrderSection
+              workSequence={state.workSequence}
+              workSequenceCounts={state.workSequenceCounts}
+              intensiveCareColors={state.intensiveCareColors}
+              editMode={editMode}
+              onSequenceChange={updateWorkSequence}
+              onSequenceCountChange={updateWorkSequenceCount}
+              onIntensiveCareChange={updateIntensiveCareColors}
+            />
+            <StatsPanel
+              processStatus={state.processStatus}
+              avgItemsPerUnit={state.avgItemsPerUnit}
+              washMethodCount={state.washMethodCount}
+              totalCount={totalCount}
+              expectedTotal={expectedTotal}
+              processingRate={processingRate}
+              editMode={editMode}
+              onProcessStatusChange={(key: ProcessKey, status: ProcessStatus) => updateProcessStatus(key, status)}
+              onAvgChange={v => set('avgItemsPerUnit', v)}
+              onWashCountChange={v => set('washMethodCount', v)}
+            />
+          </div>
+
+          {/* ── 우: 인원 + 키커 + 런드리 + 메모 ── */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+            <StaffPanel
+              staff={state.staff}
+              totalStaff={totalStaff}
+              editMode={editMode}
+              onUpdate={updateStaff}
+            />
+            <KickerPanel
+              kickers={state.kickers}
+              editMode={editMode}
+              onUpdate={updateKicker}
+            />
+            <LaundrySectionPanel
+              laundry={state.laundry}
+              editMode={editMode}
+              onUpdate={updateLaundry}
+            />
+            <HandoverNotes
+              notes={state.notes}
+              editMode={editMode}
+              onUpdate={updateNote}
+            />
+          </div>
+
+        </div>
       </div>
 
       <div style={{ height: 20 }} />

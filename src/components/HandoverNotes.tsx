@@ -2,48 +2,49 @@ import { HandoverSection } from '../types';
 
 interface Props {
   notes: HandoverSection;
+  editMode: boolean;
   onUpdate: (field: keyof HandoverSection, val: string) => void;
 }
 
-export function HandoverNotes({ notes, onUpdate }: Props) {
+export function HandoverNotes({ notes, editMode, onUpdate }: Props) {
   const value = notes.other;
-  const hasSomething = value.trim() !== '';
+  const hasContent = value.trim() !== '';
 
   return (
-    <div className="card">
-      <div className="section-header">
-        <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#7c3aed' }} />
-        <h2>인수인계 메모</h2>
-        {hasSomething && (
-          <span style={{
-            marginLeft: 'auto', fontSize: 13, fontWeight: 700,
-            background: '#fef9c3', color: '#854d0e',
-            borderRadius: 20, padding: '2px 12px',
-          }}>
-            ⚠ 전달 내용 있음
-          </span>
-        )}
+    <div style={{
+      background: '#fffbeb',
+      border: '1.5px solid #fde68a',
+      borderRadius: 10, padding: '12px 14px',
+    }}>
+      <div style={{ fontSize: 13, fontWeight: 800, color: '#92400e', marginBottom: 8 }}>
+        ⚠ 인수인계 메모
       </div>
 
-      <div style={{ padding: '14px 16px 16px' }}>
+      {editMode ? (
         <textarea
           value={value}
           onChange={e => onUpdate('other', e.target.value)}
           placeholder="장비, 인원, 지원 현황 등 특이사항을 자유롭게 작성하세요"
-          rows={6}
+          rows={5}
           style={{
             width: '100%',
-            border: `1.5px solid ${hasSomething ? '#a78bfa' : '#e2e8f0'}`,
-            borderRadius: 10,
-            background: hasSomething ? '#faf5ff' : '#f8fafc',
-            fontSize: 16, fontWeight: 600, color: '#1e293b',
-            resize: 'vertical', lineHeight: 1.7, fontFamily: 'inherit',
-            outline: 'none', padding: '12px 14px',
-            transition: 'border-color 0.2s, background 0.2s',
-            minHeight: 200,
+            border: '1.5px solid #fde68a', borderRadius: 8,
+            background: '#fff', fontSize: 13, fontWeight: 500,
+            color: '#1e293b', resize: 'vertical', lineHeight: 1.6,
+            fontFamily: 'inherit', outline: 'none', padding: '10px 12px',
+            minHeight: 100,
           }}
         />
-      </div>
+      ) : (
+        <div style={{
+          fontSize: 13, fontWeight: 500,
+          color: hasContent ? '#1e293b' : '#94a3b8',
+          lineHeight: 1.6, whiteSpace: 'pre-wrap',
+          minHeight: 48,
+        }}>
+          {hasContent ? value : '— 전달 사항 없음'}
+        </div>
+      )}
     </div>
   );
 }
