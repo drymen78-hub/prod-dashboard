@@ -20,7 +20,7 @@ const COLORS: Record<string, string> = {
 
 export function StaffPanel({ staff, editMode, onUpdate }: Props) {
   return (
-    <div className="card" style={{ marginBottom: 10 }}>
+    <div className="card" style={{ marginBottom: 10, flex: 1 }}>
       <div className="card-header">
         <h2>👥 인원 현황</h2>
         {editMode && (

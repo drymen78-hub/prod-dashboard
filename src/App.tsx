@@ -8,7 +8,6 @@ import { StaffPanel } from './components/StaffPanel';
 import { WorkOrderSection } from './components/WorkOrderSection';
 import { StatsPanel } from './components/StatsPanel';
 import { KickerPanel } from './components/KickerPanel';
-import { HandoverNotes } from './components/HandoverNotes';
 import { ProcessKey, ProcessStatus } from './types';
 
 type ToastType = 'success' | 'error' | 'loading';
@@ -19,7 +18,7 @@ export const App: React.FC = () => {
     state, set, updateStaff,
     updateWorkSequence, updateWorkSequenceCount,
     updateProcessStatus, updateIntensiveCareColors,
-    updateNote, updateKicker, handleReset,
+    updateKicker, handleReset,
     totalStaff, totalCount, expectedTotal, processingRate,
   } = useDashboard();
 
@@ -114,7 +113,7 @@ export const App: React.FC = () => {
         {/* 2컬럼 메인 그리드 */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.25fr', gap: 12, alignItems: 'stretch' }}>
 
-          {/* ── 좌: 작업순서 + 인원 + 키커 ── */}
+          {/* ── 좌: 작업순서 + 인원 ── */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             <WorkOrderSection
               workSequence={state.workSequence}
@@ -125,20 +124,17 @@ export const App: React.FC = () => {
               onSequenceCountChange={updateWorkSequenceCount}
               onIntensiveCareChange={updateIntensiveCareColors}
             />
-            <StaffPanel
-              staff={state.staff}
-              totalStaff={totalStaff}
-              editMode={editMode}
-              onUpdate={updateStaff}
-            />
-            <KickerPanel
-              kickers={state.kickers}
-              editMode={editMode}
-              onUpdate={updateKicker}
-            />
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <StaffPanel
+                staff={state.staff}
+                totalStaff={totalStaff}
+                editMode={editMode}
+                onUpdate={updateStaff}
+              />
+            </div>
           </div>
 
-          {/* ── 우: 공정별 진행단계 + 인수인계 메모 ── */}
+          {/* ── 우: 공정별 진행단계 + 키커 ── */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             <StatsPanel
               processStatus={state.processStatus}
@@ -152,13 +148,11 @@ export const App: React.FC = () => {
               onAvgChange={v => set('avgItemsPerUnit', v)}
               onWashCountChange={v => set('washMethodCount', v)}
             />
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-              <HandoverNotes
-                notes={state.notes}
-                editMode={editMode}
-                onUpdate={updateNote}
-              />
-            </div>
+            <KickerPanel
+              kickers={state.kickers}
+              editMode={editMode}
+              onUpdate={updateKicker}
+            />
           </div>
 
         </div>
